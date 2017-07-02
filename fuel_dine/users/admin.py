@@ -6,7 +6,7 @@ from django.contrib.auth.admin import UserAdmin as AuthUserAdmin
 from django.contrib.auth.forms import UserChangeForm as DjangoUserChangeForm
 from django.contrib.auth.forms import UserCreationForm as DjangoUserCreationForm
 
-from .models import User
+from .models import User, Profile
 
 
 # Forms
@@ -49,3 +49,8 @@ class UserAdmin(AuthUserAdmin):
     list_filter = ('is_superuser', 'is_active')
     search_fields = ('first_name', 'last_name', 'email')
     ordering = ('email',)
+
+
+@admin.register(Profile)
+class ProfileAdmin(admin.ModelAdmin):
+    pass

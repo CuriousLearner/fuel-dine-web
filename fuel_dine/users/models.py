@@ -6,6 +6,8 @@ from django.db import models
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 # fuel_dine Stuff
 from fuel_dine.base.models import UUIDModel
@@ -53,7 +55,7 @@ class User(AbstractBaseUser, UUIDModel, PermissionsMixin):
         ordering = ('-date_joined', )
 
     def __str__(self):
-        return str(self.id)
+        return str(self.first_name)
 
     def get_full_name(self):
         """Returns the first_name plus the last_name, with a space in between.
@@ -65,3 +67,24 @@ class User(AbstractBaseUser, UUIDModel, PermissionsMixin):
         """Returns the short name for the user.
         """
         return self.first_name.strip()
+
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    bio = models.TextField(max_length=500, blank=True)
+    location = models.CharField(max_length=30, blank=True)
+    birth_date = models.DateField(null=True, blank=True)
+
+    def __unicode__(self):
+        return str(self.user)
+
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    instance.profile.save()

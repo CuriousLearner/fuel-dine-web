@@ -6,7 +6,6 @@ import functools
 import pytest
 from unittest import mock
 
-
 class PartialMethodCaller:
     def __init__(self, obj, **partial_params):
         self.obj = obj
