@@ -1,0 +1,26 @@
+{% extends 'pages/base.html' %}
+{% load i18n %}
+{% load rest_framework %}
+{% block title %}{% trans 'Home' %} • {{ block.super }}{% endblock title %}
+{% block body_classes %}{{ block.super}} page-home {% endblock body_classes %}
+{% block content %}
+  <p>
+    {% trans 'Welcome to Fuel Dine restaurants page' %}
+  {{ request.user }}
+  </p>
+  {% if not results %}
+    <p>There are no restaurants to display.</p>
+  {% endif %}
+  <p>
+  {% for restaurant in results %}
+    <p>
+      <a href="{% url 'restaurant-detail' pk=restaurant.id %}">Name: {{restaurant.name}}<br></a>
+      Votes: {{ restaurant.vote_score }}<br>
+      Contact: {{ restaurant.contact }}<br>
+      Website: {{ restaurant.website }}<br>
+      Description: {{ restaurant.description }}<br>
+    </p>
+  {% endfor %}
+  </p>
+
+{% endblock content %}
