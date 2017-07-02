@@ -1,0 +1,66 @@
+[vagrant]
+192.168.33.12
+
+[vagrant:vars]
+vm=1
+environment=vagrant
+project_namespace={{ project_name }}-{{ environment }}
+user=vagrant
+project_path=/home/vagrant/fuel-dine-web
+venv_path=/home/vagrant/venv
+django_requirements_file=requirements/development.txt
+django_settings="settings.development"
+use_letsencrypt=False
+pg_db=fuel_dine
+pg_user=vagrant
+pg_password=vagrant
+domain_name=vagrant.fuel_dine.com
+
+[dev]
+dev.fuel_dine.com
+
+[dev:vars]
+vm=0
+environment=dev
+user=ubuntu
+project_namespace={{ project_name }}-{{ environment }}
+project_path=/home/ubuntu/{{ environment }}/fuel-dine-web
+venv_path=/home/ubuntu/{{ environment }}/{{ project_name }}-venv
+use_letsencrypt=True
+letsencrypt_email=sanyam@sanyamkhurana.com
+django_requirements_file=requirements.txt
+django_settings="settings.production"
+domain_name=dev.fuel_dine.com
+
+
+[qa]
+qa.fuel_dine.com
+
+[qa:vars]
+vm=0
+environment=qa
+user=ubuntu
+project_namespace={{ project_name }}-{{ environment }}
+project_path=/home/ubuntu/{{ environment }}/fuel-dine-web
+venv_path=/home/ubuntu/{{ environment }}/{{ project_name }}-venv
+use_letsencrypt=True
+letsencrypt_email=sanyam@sanyamkhurana.com
+django_requirements_file=requirements.txt
+django_settings="settings.production"
+domain_name=qa.fuel_dine.com
+
+[production]
+fuel_dine.com
+
+[production:vars]
+vm=0
+environment=prod
+user=ubuntu
+project_namespace={{ project_name }}-{{ environment }}
+project_path=/home/ubuntu/{{ environment }}/fuel-dine-web
+venv_path=/home/ubuntu/{{ environment }}/{{ project_name }}-venv
+use_letsencrypt=True
+letsencrypt_email=sanyam@sanyamkhurana.com
+django_requirements_file=requirements.txt
+django_settings="settings.production"
+domain_name=fuel_dine.com
