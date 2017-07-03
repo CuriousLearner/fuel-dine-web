@@ -1,0 +1,15 @@
+{% extends 'pages/base.html' %}
+{% load i18n %}
+{% load rest_framework %}
+{% block title %}{% trans 'Home' %} • {{ block.super }}{% endblock title %}
+{% block body_classes %}{{ block.super}} page-home {% endblock body_classes %}
+{% block content %}
+{% block comment_form %}
+  <p>Write a new comment:</p>
+  <form action="{% url 'comment-add' pk=review %}" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Submit" />
+  </form>
+{% endblock %}
+{% endblock content %}

@@ -31,6 +31,13 @@ urlpatterns = [
         restaurant_views.vote_for_restaurant, name='restaurant-vote'),
     url(r'^about/$', TemplateView.as_view(template_name='pages/about.html'), name='about'),
     # Your stuff: custom urls go here
+    url(r'restaurant/(?P<pk>\d+)/review/',
+        restaurant_views.add_review_form, name='review-add'),
+    url(r'review/(?P<pk>\d+)/comment/',
+        restaurant_views.add_comment_form, name='comment-add'),
+    url(r'thanks/',
+        TemplateView.as_view(template_name='pages/thanks.html'),
+        name='thanks'),
 ]
 
 urlpatterns += [

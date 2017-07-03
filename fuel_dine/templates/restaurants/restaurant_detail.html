@@ -15,6 +15,8 @@
     Website: {{ restaurant.website }}<br>
     Description {{ restaurant.description }}<br>
   </p>
+  <p>Write a <a href="{% url 'review-add' pk=restaurant.id  %}">new
+    review</a> for this restaurant now!</p>
 
   Reviews:
   {% if not restaurant.review_set.exists %}
@@ -22,9 +24,15 @@
   {% endif %}
   <p>
     {% for review in restaurant.review_set.all %}
-      Review: {{ review.text }}<br>
+      Review
+      {% ifequal review.user|slugify request.user|slugify %}
+        * {# Special symbol if it's your own review #}
+      {% endifequal %}
+      : {{ review.text }}<br>
       Posted By: {{ review.user }}<br>
       Posted on: {{ review.posted_at }}<br>
+      <a href="{% url 'comment-add' pk=review.id %}">Comment on this review</a>
+      <br>
       Comments:
       {% for comment in review.comment_set.all %}
         Text: {{ comment.text }}<br>

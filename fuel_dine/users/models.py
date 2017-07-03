@@ -55,7 +55,7 @@ class User(AbstractBaseUser, UUIDModel, PermissionsMixin):
         ordering = ('-date_joined', )
 
     def __str__(self):
-        return str(self.first_name)
+        return str(self.email)
 
     def get_full_name(self):
         """Returns the first_name plus the last_name, with a space in between.
@@ -75,8 +75,8 @@ class Profile(models.Model):
     location = models.CharField(max_length=30, blank=True)
     birth_date = models.DateField(null=True, blank=True)
 
-    def __unicode__(self):
-        return str(self.user)
+    def __str__(self):
+        return str(self.user.email)
 
 
 @receiver(post_save, sender=User)

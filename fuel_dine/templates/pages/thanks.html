@@ -1,0 +1,17 @@
+{% extends 'pages/base.html' %}
+{% load i18n %}
+{% block title %}{% trans 'Home' %} • {{ block.super }}{% endblock title %}
+{% block body_classes %}{{ block.super}} page-home {% endblock body_classes %}
+{% block content %}
+  <p>
+    {% trans 'Welcome to Fuel Dine' %}
+  </p>
+  {% if messages %}
+    <ul class="messages">
+      {% for message in messages %}
+      <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+  <p>Go to <a href="{% url 'home' %}">home page</a>!</p>
+{% endblock content %}
