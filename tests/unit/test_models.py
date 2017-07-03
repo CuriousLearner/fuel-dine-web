@@ -43,3 +43,11 @@ def test_comment_model_method_works(db, method):
     review = f.ReviewFactory(restaurant=restaurant, user=user.profile)
     comment = f.CommentFactory(review=review, user=user.profile)
     assert getattr(comment, method)
+
+
+@pytest.mark.parametrize('method', [
+    '__str__',
+])
+def test_user_model_method_works(db, method):
+    user = f.UserFactory(email='f@F.com', password='12345453')
+    assert getattr(user, method)

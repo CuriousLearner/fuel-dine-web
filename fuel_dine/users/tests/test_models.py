@@ -3,7 +3,7 @@
 # Third Party Stuff
 from django.test import TestCase
 
-from fuel_dine.users.models import User
+from fuel_dine.users.models import User, Profile
 
 
 class UserModelTestCase(TestCase):
@@ -16,11 +16,22 @@ class UserModelTestCase(TestCase):
         assert u.email == 'f@f.com'
         assert u.get_full_name() == 'F B'
         assert u.get_short_name() == 'F'
-        assert str(u) == str(u.id)
 
     def test_create_super_user(self):
         u = User.objects.create_superuser(email='f@f.com', password='abc')
         assert u.is_active is True
         assert u.is_staff is True
         assert u.is_superuser is True
-        assert str(u) == str(u.id)
+
+
+class ProfileTestCase(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create(email='f@F.com', password='123455')
+
+    def test_user_profile_created(self):
+        profile = Profile.objects.first()
+        self.assertEqual(profile.user, self.user)
+
+    def tearDown(self):
+        self.user.delete()
