@@ -18,7 +18,7 @@ class Place(models.Model):
     lat = models.FloatField(verbose_name=_(u'latitude'))
     lon = models.FloatField(verbose_name=_(u'longitude'))
 
-    def __unicode__(self):
+    def __str__(self):
         return "Coordinates: {}, {}".format(self.lat, self.lon)
 
     class Meta:
@@ -47,8 +47,7 @@ class Restaurant(VoteModel, Place):
                                    verbose_name=_(u'description'))
     website = models.URLField(blank=True, null=True, verbose_name=_(u'website'))
     address = models.TextField(verbose_name='Address',
-                               help_text='Location of the restaurant',
-                               )
+                               help_text='Location of the restaurant')
     contact = models.CharField(max_length=10, blank=True, null=True,
                                verbose_name=_(u'contact'))
     created_at = models.DateTimeField(default=timezone.now, null=False,
@@ -59,8 +58,11 @@ class Restaurant(VoteModel, Place):
         verbose_name_plural = "restaurants"
         ordering = ['-created_at']
 
-    def __unicode__(self):
+    def __str__(self):
         return "{0}".format(self.name)
+
+    def get_votes_count(self):
+        return self.votes.count()
 
 
 class Visit(models.Model):
@@ -87,7 +89,7 @@ class Review(ReviewComments):
     class Meta:
         ordering = ['-posted_at']
 
-    def __unicode__(self):
+    def __str__(self):
         return "{0} - {1}".format(self.user, self.text)
 
 
