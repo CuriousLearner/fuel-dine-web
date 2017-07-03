@@ -12,6 +12,8 @@ There is a bit of magic going on behind the scenes with `G` method from https://
 """
 
 # Third Party Stuff
+import factory
+
 from django.apps import apps
 from django.conf import settings
 from django_dynamic_fixture import G
@@ -24,3 +26,46 @@ def create_user(**kwargs):
     user.set_password(kwargs.get('password', 'test'))
     user.save()
     return user
+
+
+class Factory(factory.DjangoModelFactory):
+    class Meta:
+        strategy = factory.CREATE_STRATEGY
+        model = None
+        abstract = True
+
+
+class UserFactory(Factory):
+    class Meta:
+        model = "users.User"
+        strategy = factory.CREATE_STRATEGY
+
+
+class ProfileFactory(Factory):
+    class Meta:
+        model = "users.Profile"
+        strategy = factory.CREATE_STRATEGY
+
+
+class RestaurantFactory(Factory):
+    class Meta:
+        model = "restaurants.Restaurant"
+        strategy = factory.CREATE_STRATEGY
+
+
+class VisitFactory(Factory):
+    class Meta:
+        model = "restaurants.Visit"
+        strategy = factory.CREATE_STRATEGY
+
+
+class CommentFactory(Factory):
+    class Meta:
+        model = "restaurants.Comment"
+        strategy = factory.CREATE_STRATEGY
+
+
+class ReviewFactory(Factory):
+    class Meta:
+        model = "restaurants.Review"
+        strategy = factory.CREATE_STRATEGY
