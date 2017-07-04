@@ -7,6 +7,13 @@ class RestaurantForm(ModelForm):
     class Meta:
         model = Restaurant
         fields = '__all__'
+        exclude = ('is_active', 'created_at', 'votes', 'vote_score',
+                   'num_vote_up', 'num_vote_down')
+
+    def clean(self):
+        if self.cleaned_data['name'] != '':
+            return super().clean()
+        raise ValidationError('Please add a name for the Restaurant')
 
 
 class ReviewForm(ModelForm):

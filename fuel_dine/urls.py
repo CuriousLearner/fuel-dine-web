@@ -30,17 +30,24 @@ urlpatterns = [
     url(r'^about/$', TemplateView.as_view(template_name='pages/about.html'), name='about'),
     # Your stuff: custom urls go here
     url(r'^$', restaurant_views.RestaurantView.as_view(), name='home'),
-    url(r'restaurant/(?P<pk>\d+)$',
-        restaurant_views.RestaurantDetailView.as_view(), name='restaurant-detail'),
-    url(r'restaurant/(?P<pk>\d+)/vote/(?P<action>\w+)$',
+    url(r'^restaurant/(?P<pk>\d+)$',
+        restaurant_views.RestaurantDetailView.as_view(),
+        name='restaurant-detail'),
+    url(r'^restaurant/(?P<pk>\d+)/vote/(?P<action>\w+)$',
         restaurant_views.vote_for_restaurant, name='restaurant-vote'),
-    url(r'restaurant/(?P<pk>\d+)/review/',
+    url(r'^restaurant/(?P<pk>\d+)/review/$',
         restaurant_views.add_review_form, name='review-add'),
-    url(r'review/(?P<pk>\d+)/comment/',
+    url(r'^review/(?P<pk>\d+)/comment/$',
         restaurant_views.add_comment_form, name='comment-add'),
-    url(r'thanks/',
+    url(r'^thanks/$',
         TemplateView.as_view(template_name='pages/thanks.html'),
         name='thanks'),
+    url(r'^add_restaurant_reverse_geocoding/$',
+        restaurant_views.add_restaurant_form,
+        name='restaurant-add-geo-rev'),
+    url(r'^add_restaurant_geocoding/$',
+        restaurant_views.add_restaurant_form,
+        name='restaurant-add-geo')
 ]
 
 urlpatterns += [

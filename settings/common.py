@@ -413,3 +413,7 @@ SITE_INFO = {
 
 # Redirect to home url after logging in
 LOGIN_REDIRECT_URL = 'home'
+
+# Google services API Key
+# Generate your key here: https://developers.google.com/maps/documentation/geolocation/get-api-key
+GOOGLE_SERVICES_API_KEY = env('GOOGLE_SERVICES_API_KEY')

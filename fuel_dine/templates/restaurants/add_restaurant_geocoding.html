@@ -1,0 +1,17 @@
+{% extends 'restaurants/restaurant_base.html' %}
+{% load static %}
+{% block content %}
+  <div class="add-restaurant">
+    <div id="floating-panel">
+      <input id="address" type="textbox" value="Sydney, NSW">
+      <input id="submit" type="button" value="Geocode">
+    </div>
+    <div id="map"></div>
+
+    <form action="{% url 'restaurant-add-geo' %}" method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <input type="submit" value="Submit" />
+    </form>
+  </div>
+{% endblock content %}

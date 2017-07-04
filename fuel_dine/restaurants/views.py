@@ -5,6 +5,8 @@ from django.views.generic import DetailView
 from django.shortcuts import render, HttpResponseRedirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.urls import reverse
+from django.conf import settings
 
 from rest_framework import status
 from rest_framework.generics import CreateAPIView, ListCreateAPIView
@@ -16,7 +18,7 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticate
 
 from .models import Restaurant, Review, Comment
 from .serializers import RestaurantSerializer, ReviewSerializer, CommentSerializer
-from .forms import ReviewForm, CommentForm
+from .forms import ReviewForm, CommentForm, RestaurantForm
 
 # Create your views here.
 
@@ -139,6 +141,49 @@ def add_comment_form(request, pk):
 
     return render(request, 'restaurants/add_comment_form.html',
                   {'form': form, 'review': pk})
+
+
+@api_view(['GET', 'POST'])
+def add_restaurant_form(request):
+    """View for rendering form for adding restaurant.
+
+    Dynamically attaches context of rendering geo-location searching or reverse
+    geo-location searching of the restaurant.
+
+    The context would consist of template and js file to be chosen to render
+    the view.
+
+    :param request: HTTPRequest Object
+    :return: HttpResponseRedirect to /thanks/ on successful posting.
+    If Comment text is empty, return the Form with error.
+    """
+    if request.method == 'POST':
+        # create a form instance and populate it with data from the request:
+        form = RestaurantForm(request.POST)
+        # check whether it's valid:
+        if form.is_valid():
+            # process the data in form.cleaned_data as required
+            restaurant = form.save(commit=False)
+            restaurant.save()
+            messages.success(request, "Thanks for adding the restaurant!")
+            return HttpResponseRedirect('/thanks/')
+
+    else:
+        form = RestaurantForm()
+
+    context = {
+        'form': form,
+        'GOOGLE_SERVICES_API_KEY': settings.GOOGLE_SERVICES_API_KEY
+    }
+
+    if request.get_full_path() == reverse('restaurant-add-geo'):
+        template_name = 'restaurants/add_restaurant_geocoding.html'
+        context['js_file_name'] = 'geocode.js'
+    else:
+        template_name = 'restaurants/add_restaurant_geocoding_reverse.html'
+        context['js_file_name'] = 'reverse_geocode.js'
+
+    return render(request, template_name, context)
 
 
 @api_view(['POST'])
