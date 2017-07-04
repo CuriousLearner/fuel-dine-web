@@ -410,3 +410,6 @@ SITE_INFO = {
     'RELEASE_VERSION': RELEASE_VERSION,
     'IS_RAVEN_INSTALLED': RAVEN_CONFIG['dsn'] is not ''
 }
+
+# Redirect to home url after logging in
+LOGIN_REDIRECT_URL = 'home'

@@ -10,6 +10,7 @@ from django.conf import settings
 from django.conf.urls import include, url
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.contrib.auth import views as auth_views
 from django.views.generic import TemplateView
 
 # fuel_dine Stuff
@@ -24,6 +25,8 @@ handler500 = base_views.server_error
 # Top Level Pages
 # ==============================================================================
 urlpatterns = [
+    url(r'^accounts/login/$', auth_views.login, name='login'),
+    url(r'^accounts/logout/$', auth_views.logout, {'next_page': '/'},  name='logout'),
     url(r'^$', restaurant_views.RestaurantView.as_view(), name='home'),
     url(r'restaurant/(?P<pk>\d+)$',
         restaurant_views.RestaurantDetailView.as_view(), name='restaurant-detail'),
