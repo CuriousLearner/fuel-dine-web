@@ -9,7 +9,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="version" content="{{ site_info.RELEASE_VERSION }}">
     <meta name="description" content="{% block meta_description %}{% endblock meta_description %}">
-    
     {% if site_info.IS_RAVEN_INSTALLED %}
         <script>Raven.config('{% sentry_public_dsn %}').install()</script>
     {% endif %}
@@ -29,7 +28,7 @@
     <![endif]-->
 
     {% block header %}
-      <h1>fuel_dine</h1>
+      <h1><a href="{% url 'home' %}">fuel_dine</a></h1>
     {% endblock header %}
 
     {% block content %}

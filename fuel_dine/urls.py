@@ -27,13 +27,13 @@ handler500 = base_views.server_error
 urlpatterns = [
     url(r'^accounts/login/$', auth_views.login, name='login'),
     url(r'^accounts/logout/$', auth_views.logout, {'next_page': '/'},  name='logout'),
+    url(r'^about/$', TemplateView.as_view(template_name='pages/about.html'), name='about'),
+    # Your stuff: custom urls go here
     url(r'^$', restaurant_views.RestaurantView.as_view(), name='home'),
     url(r'restaurant/(?P<pk>\d+)$',
         restaurant_views.RestaurantDetailView.as_view(), name='restaurant-detail'),
     url(r'restaurant/(?P<pk>\d+)/vote/(?P<action>\w+)$',
         restaurant_views.vote_for_restaurant, name='restaurant-vote'),
-    url(r'^about/$', TemplateView.as_view(template_name='pages/about.html'), name='about'),
-    # Your stuff: custom urls go here
     url(r'restaurant/(?P<pk>\d+)/review/',
         restaurant_views.add_review_form, name='review-add'),
     url(r'review/(?P<pk>\d+)/comment/',
