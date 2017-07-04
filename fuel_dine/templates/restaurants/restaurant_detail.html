@@ -12,7 +12,11 @@
   </p>
   <p>
     <b>Name</b>: {{ restaurant.name }}<br>
-    <b>Votes</b>: {{ restaurant.vote_score|default_if_none:"&nbsp;" }}<br>
+    <b>Votes</b>: {{ restaurant.vote_score|default_if_none:"&nbsp;" }}
+      <i class="material-icons">arrow_upward</i>
+      <i class="material-icons">arrow_downward</i>
+      <i class="material-icons">thumb_down</i>
+    <br>
     <b>Contact</b>: {{ restaurant.contact|default_if_none:"&nbsp;" }}<br>
     <b>Website</b>: {{ restaurant.website|default_if_none:"&nbsp;" }}<br>
     <b>Description</b>: {{ restaurant.description|default_if_none:"&nbsp;" }}<br>

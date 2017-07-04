@@ -10,6 +10,8 @@
       <b>{{ request.user }}</b>
     {% endif %}
   </p>
+  <p>You can add a new restaurant by <a href="{% url 'restaurant-add-geo' %}">geocoding</a> or
+    <a href="{% url 'restaurant-add-geo-rev' %}">reverse geocoding</a> to the app.</p>
   {% if not results %}
     <p>There are no restaurants to display.</p>
   {% endif %}
