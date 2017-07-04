@@ -6,7 +6,9 @@
 {% block content %}
   <p>
     {% trans 'Welcome to Fuel Dine restaurants page' %}
-  {{ request.user }}
+    {% if request.user.is_authenticated %}
+      <b>{{ request.user }}</b>
+    {% endif %}
   </p>
   {% if not results %}
     <p>There are no restaurants to display.</p>
