@@ -2,7 +2,6 @@
  * element that contains the map. */
 #map {
   height: 80%;
-  width: 680px;
   margin-top: 100px;
   margin-bottom: 100px;
 }
@@ -16,9 +15,12 @@ html, body {
   height: 100%;
   position: absolute;
   top: 70px;
-  bottom: 0;
   left: 20%;
   right: 20%;
+}
+
+form {
+  margin-bottom: 110px;
 }
 
 #floating-panel {
