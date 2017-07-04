@@ -3,13 +3,14 @@
 {% load rest_framework %}
 {% block title %}{% trans 'Home' %} • {{ block.super }}{% endblock title %}
 {% block body_classes %}{{ block.super}} page-home {% endblock body_classes %}
+{% load material_form %}
 {% block content %}
-{% block review_form %}
-  <p>Write a new review:</p>
-  <form action="{% url 'review-add' pk=restaurant %}" method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Submit" />
-  </form>
-{% endblock %}
+  {% block review_form %}
+    <p>Write a new review:</p>
+    <form action="{% url 'review-add' pk=restaurant %}" method="post">
+      {% csrf_token %}
+      {% form form=form %}{% endform %}
+      <input type="submit" value="Submit" />
+    </form>
+  {% endblock %}
 {% endblock content %}

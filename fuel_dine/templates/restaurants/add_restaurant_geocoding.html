@@ -1,5 +1,6 @@
-{% extends 'restaurants/restaurant_base.html' %}
+{% extends 'restaurants/add_restaurant_base.html' %}
 {% load static %}
+{% load material_form %}
 {% block content %}
   <div class="add-restaurant">
     <div id="floating-panel">
@@ -10,7 +11,7 @@
 
     <form action="{% url 'restaurant-add-geo' %}" method="post">
       {% csrf_token %}
-      {{ form.as_p }}
+      {% form form=form %}{% endform %}
       <input type="submit" value="Submit" />
     </form>
   </div>
