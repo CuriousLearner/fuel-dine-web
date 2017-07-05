@@ -36,17 +36,17 @@ urlpatterns = [
     url(r'^restaurant/(?P<pk>\d+)/vote/(?P<action>\w+)$',
         restaurant_views.vote_for_restaurant, name='restaurant-vote'),
     url(r'^restaurant/(?P<pk>\d+)/review/$',
-        restaurant_views.add_review_form, name='review-add'),
+        restaurant_views.AddReviewView.as_view(), name='review-add'),
     url(r'^review/(?P<pk>\d+)/comment/$',
-        restaurant_views.add_comment_form, name='comment-add'),
+        restaurant_views.AddCommentView.as_view(), name='comment-add'),
     url(r'^thanks/$',
         TemplateView.as_view(template_name='pages/thanks.html'),
         name='thanks'),
     url(r'^add_restaurant_reverse_geocoding/$',
-        restaurant_views.add_restaurant_form,
+        restaurant_views.AddRestaurantView.as_view(template_name='restaurants/add_restaurant_geocoding_reverse.html'),
         name='restaurant-add-geo-rev'),
     url(r'^add_restaurant_geocoding/$',
-        restaurant_views.add_restaurant_form,
+        restaurant_views.AddRestaurantView.as_view(),
         name='restaurant-add-geo')
 ]
 

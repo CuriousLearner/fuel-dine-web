@@ -1,6 +1,7 @@
 {% extends 'pages/base.html' %}
 {% load i18n %}
 {% load static %}
+{% load rest_framework %}
 {% block title %}{% trans 'Home' %} • {{ block.super }}{% endblock title %}
 {% block body_classes %}{{ block.super}} page-home {% endblock body_classes %}
 {% block content %}
@@ -9,7 +10,7 @@
   <p>Write a new comment:</p>
   <form action="{% url 'comment-add' pk=review %}" method="post">
     {% csrf_token %}
-    {% form form=form %}{% endform %}
+    {% render_form serializer %}
     <input class="waves-effect waves-light btn" type="submit" value="Submit" />
   </form>
 {% endblock %}

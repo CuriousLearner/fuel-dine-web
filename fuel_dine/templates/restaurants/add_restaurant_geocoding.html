@@ -1,5 +1,6 @@
 {% extends 'restaurants/add_restaurant_base.html' %}
 {% load static %}
+{% load rest_framework %}
 {% load material_form %}
 {% block content %}
   {{ block.super }}
@@ -14,7 +15,7 @@
 
     <form action="{% url 'restaurant-add-geo' %}" method="post">
       {% csrf_token %}
-      {% form form=form %}{% endform %}
+      {% render_form serializer %}
       <input class="waves-effect waves-light btn" type="submit"
              value="Submit" />
     </form>

@@ -10,7 +10,7 @@
     <p>Write a new review:</p>
     <form action="{% url 'review-add' pk=restaurant %}" method="post">
       {% csrf_token %}
-      {% form form=form %}{% endform %}
+      {% render_form serializer %}
       <input class="waves-effect waves-light btn" type="submit"
              value="Submit" />
     </form>
