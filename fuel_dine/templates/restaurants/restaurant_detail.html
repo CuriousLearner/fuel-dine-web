@@ -25,8 +25,13 @@
          onclick="voteDown({{ restaurant.id }});">
         <i class="material-icons arrow_downward">arrow_downward</i>
       </a>
-      <a class="waves-effect waves-light btn" href="#" onclick="thumbsDown();">
+      <a class="waves-effect waves-light btn" href="#"
+         onclick="thumbsDown({{ restaurant.id }});">
         <i class="material-icons thumb_down">thumb_down</i>
+      </a>
+      <a class="waves-effect waves-light btn" href="#"
+         onclick="visited({{ restaurant.id }});">
+        <i class="material-icons visited">room</i>
       </a>
     </div>
     <br>

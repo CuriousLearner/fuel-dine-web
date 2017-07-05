@@ -47,7 +47,13 @@ urlpatterns = [
         name='restaurant-add-geo-rev'),
     url(r'^add_restaurant_geocoding/$',
         restaurant_views.AddRestaurantView.as_view(),
-        name='restaurant-add-geo')
+        name='restaurant-add-geo'),
+    url(r'^restaurant/(?P<pk>\d+)/thumbdown$',
+        restaurant_views.thumbs_down_for_restaurant,
+        name='restaurant-thumb-down'),
+    url(r'^restaurant/(?P<pk>\d+)/visited$',
+        restaurant_views.mark_restaurant_visited,
+        name='restaurant-visited'),
 ]
 
 urlpatterns += [

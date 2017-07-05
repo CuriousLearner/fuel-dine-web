@@ -60,7 +60,7 @@ function voteDown(restaurant_id) {
 function thumbsDown(restaurant_id) {
   $.ajax({
     method: "POST",
-    url: "/restaurant/pk/vote/up".replace('pk', restaurant_id),
+    url: "/restaurant/pk/thumbdown".replace('pk', restaurant_id),
     data: {csrfmiddlewaretoken: csrftoken}
   })
   .done(function(msg) {
@@ -73,3 +73,18 @@ function thumbsDown(restaurant_id) {
   });
 }
 
+function visited(restaurant_id) {
+  $.ajax({
+    method: "POST",
+    url: "/restaurant/pk/visited".replace('pk', restaurant_id),
+    data: {csrfmiddlewaretoken: csrftoken}
+  })
+  .done(function(msg) {
+    console.log(msg);
+    alert("You just marked this restaurant as visited!");
+  })
+  .error(function(msg) {
+    console.log(JSON.stringify(msg));
+    alert(msg["responseJSON"]["error"]);
+  });
+}
