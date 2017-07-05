@@ -78,7 +78,6 @@ class CommentCreateView(CreateAPIView):
 # All FBVs goes here
 
 @login_required()
-@permission_classes(IsAuthenticated,)
 def add_review_form(request, pk):
     """View for rendering form for adding review to a particular restaurant.
     Initial form contains Review text as "I like ..."
@@ -110,8 +109,7 @@ def add_review_form(request, pk):
                   {'form': form, 'restaurant': pk})
 
 
-@api_view(['GET', 'POST'])
-@permission_classes(IsAuthenticated,)
+@login_required()
 def add_comment_form(request, pk):
     """View for rendering form for adding comment to a particular review.
     Initial form contains Comment text as "I like ..."
@@ -143,7 +141,7 @@ def add_comment_form(request, pk):
                   {'form': form, 'review': pk})
 
 
-@api_view(['GET', 'POST'])
+@login_required()
 def add_restaurant_form(request):
     """View for rendering form for adding restaurant.
 

@@ -1,0 +1,13 @@
+/* Custom stylesheet for overriding default styling */
+
+.review {
+  margin-left: 10px;
+}
+
+.comments {
+  margin-left: 40px;
+}
+
+.comment-text {
+  margin-left: 10px;
+}

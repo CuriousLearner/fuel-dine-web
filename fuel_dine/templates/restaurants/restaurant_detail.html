@@ -1,44 +1,55 @@
 {% extends 'pages/base.html' %}
 {% load i18n %}
+{% load static %}
 {% load rest_framework %}
 {% block title %}{% trans 'Home' %} • {{ block.super }}{% endblock title %}
 {% block body_classes %}{{ block.super}} page-home {% endblock body_classes %}
 {% block content %}
   <p>
     {% trans 'Welcome to Fuel Dine restaurants page' %}
-  {{ request.user }}
+    {% if request.user.is_authenticated %}
+      <b>{{ request.user }}</b>
+    {% endif %}
   </p>
   <p>
     <b>Name</b>: {{ restaurant.name }}<br>
-    Votes: {{ restaurant.vote_score }}<br>
-    Contact: {{ restaurant.contact }}<br>
-    Website: {{ restaurant.website }}<br>
-    Description {{ restaurant.description }}<br>
+    <b>Votes</b>: {{ restaurant.vote_score|default_if_none:"&nbsp;" }}
+      <i class="material-icons arrow_upward">arrow_upward</i>
+      <i class="material-icons arrow_downward">arrow_downward</i>
+      <i class="material-icons thumb_down">thumb_down</i>
+    <br>
+    <b>Contact</b>: {{ restaurant.contact|default_if_none:"&nbsp;" }}<br>
+    <b>Website</b>: {{ restaurant.website|default_if_none:"&nbsp;" }}<br>
+    <b>Description</b>: {{ restaurant.description|default_if_none:"&nbsp;" }}<br>
   </p>
-  <p>Write a <a href="{% url 'review-add' pk=restaurant.id  %}">new
-    review</a> for this restaurant now!</p>
-
-  Reviews:
+  <p>Write a <a href="{% url 'review-add' pk=restaurant.id  %}"><b>new
+    review</b></a> for this restaurant now!</p>
+  <hr>
+  <b>Reviews</b>:
   {% if not restaurant.review_set.exists %}
     <p>Oh! There are no reviews to show right now!</p>
   {% endif %}
   <p>
     {% for review in restaurant.review_set.all %}
-      Review
-      {% ifequal review.user|slugify request.user|slugify %}
-        * {# Special symbol if it's your own review #}
-      {% endifequal %}
-      : {{ review.text }}<br>
-      Posted By: {{ review.user }}<br>
-      Posted on: {{ review.posted_at }}<br>
-      <a href="{% url 'comment-add' pk=review.id %}">Comment on this review</a>
-      <br>
-      Comments:
-      {% for comment in review.comment_set.all %}
-        Text: {{ comment.text }}<br>
-        Commented by: {{ comment.user }}<br>
-        Posted at: {{ comment.posted_at }}<br>
-      {% endfor %}
+      <div class="review">
+        <b>
+          {% ifequal review.user|slugify request.user|slugify %}
+            <i class="material-icons">face</i>
+            {# Special symbol if it's your own review #}
+          {% endifequal %}
+        </b>
+        <small><b>{{ review.user }}</b> added review on {{ review.posted_at }}</small>
+        <br>
+        {{ review.text }}<br>
+        <small><a href="{% url 'comment-add' pk=review.id %}"><b>Comment on
+          this review</b></a></small>
+      </div>
+      <div class="comments">
+        {% for comment in review.comment_set.all %}
+          <small><b>{{ comment.user }}</b> commented on {{ comment.posted_at }}</small><br>
+          <div class="comment-text">{{ comment.text }}</div>
+        {% endfor %}
+      </div>
       <hr>
     {% endfor %}
   </p>

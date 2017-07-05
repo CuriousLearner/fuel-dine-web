@@ -1,8 +1,9 @@
 /* Always set the map height explicitly to define the size of the div
  * element that contains the map. */
 #map {
-  height: 100%;
-  width: 680px;
+  height: 80%;
+  margin-top: 100px;
+  margin-bottom: 100px;
 }
 
 /* Optional: Makes the sample page fill the window. */
@@ -14,13 +15,17 @@ html, body {
   height: 100%;
   position: absolute;
   top: 70px;
-  bottom: 0;
   left: 20%;
   right: 20%;
 }
 
+form {
+  margin-bottom: 110px;
+}
+
 #floating-panel {
   position: absolute;
+  margin-top: 100px;
   top: 10px;
   left: 25%;
   z-index: 5;

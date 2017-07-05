@@ -13,8 +13,13 @@
         <script>Raven.config('{% sentry_public_dsn %}').install()</script>
     {% endif %}
 
+    {% include 'material/includes/material_css.html' %}
+
     {% block css %}
     <link href="{% static 'css/normalize.css' %}" rel="stylesheet">
+    <link href="{% static 'css/main.css' %}" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet">
     {% compress css %}
     <link href="{% static 'css/main.scss' %}"  type="text/x-scss" rel="stylesheet">
     {% endcompress %}
@@ -45,6 +50,7 @@
       <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 
       <!-- Your stuff: Third-party javascript libraries go here -->
+      {% include 'material/includes/material_js.html' %}
 
       <!-- place project specific Javascript in this file -->
       {% compress js %}
