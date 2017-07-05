@@ -9,7 +9,7 @@ from django.conf import settings
 from rest_framework import status
 from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.renderers import TemplateHTMLRenderer, JSONRenderer
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.views import APIView
@@ -176,6 +176,7 @@ class CommentCreateView(CreateAPIView):
 
 
 @api_view(['POST'])
+@renderer_classes((JSONRenderer,))
 def vote_for_restaurant(request, pk, action):
     """API for up vote or down vote a particular Restaurant.
 
@@ -202,6 +203,12 @@ def vote_for_restaurant(request, pk, action):
             status=status.HTTP_404_NOT_FOUND
         )
     vote_casted = False
+
+    if restaurant.votes.exists(user_id):
+        return Response(
+            data={'error': 'You have casted vote before for this restaurant'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
     if action == 'up':
         restaurant.votes.up(user_id=user_id)
         vote_casted = True
@@ -214,10 +221,8 @@ def vote_for_restaurant(request, pk, action):
             data={'data': 'Vote casted successfully'},
             status=status.HTTP_201_CREATED
         )
-
     else:
         return Response(
             data={'error': 'Unknown action for casting vote'},
             status=status.HTTP_400_BAD_REQUEST
         )
-

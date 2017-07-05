@@ -14,20 +14,18 @@
   <p>
     <b>Name</b>: {{ restaurant.name }}<br>
     <b>Votes</b>:
-    <span id="vote-count">
-      {{ restaurant.vote_score|default_if_none:"&nbsp;" }}
-    </span>
+    <span id="vote-count">{{ restaurant.vote_score|default_if_none:"&nbsp;" }}</span>
 
     <div class="right">
       <a class="waves-effect waves-light btn" href="#"
-         onclick="vote_up({{ restaurant.id }});">
+         onclick="voteUp({{ restaurant.id }});">
         <i class="material-icons arrow_upward">arrow_upward</i>
       </a>
       <a class="waves-effect waves-light btn" href="#"
-         onclick="vote_down({{ restaurant.id }});">
+         onclick="voteDown({{ restaurant.id }});">
         <i class="material-icons arrow_downward">arrow_downward</i>
       </a>
-      <a class="waves-effect waves-light btn" href="#" onclick="thumbs_down();">
+      <a class="waves-effect waves-light btn" href="#" onclick="thumbsDown();">
         <i class="material-icons thumb_down">thumb_down</i>
       </a>
     </div>
