@@ -3,6 +3,8 @@
 {% load material_form %}
 {% block content %}
   {{ block.super }}
+  <p>Reverse geocode restaurant location and fill in the form below to add
+    it to the app.</p>
   <div class="add-restaurant">
     <div id="floating-panel">
       <input id="latlng" type="text" value="40.714224,-73.961452">
@@ -13,7 +15,8 @@
     <form action="{% url 'restaurant-add-geo-rev' %}" method="post">
       {% csrf_token %}
       {% form form=form %}{% endform %}
-      <input type="submit" value="Submit" />
+      <input class="waves-effect waves-light btn" type="submit"
+             value="Submit" />
     </form>
   </div>
 {% endblock content %}

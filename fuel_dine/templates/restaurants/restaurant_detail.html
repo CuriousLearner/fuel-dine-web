@@ -1,5 +1,6 @@
 {% extends 'pages/base.html' %}
 {% load i18n %}
+{% load static %}
 {% load rest_framework %}
 {% block title %}{% trans 'Home' %} • {{ block.super }}{% endblock title %}
 {% block body_classes %}{{ block.super}} page-home {% endblock body_classes %}
@@ -13,9 +14,9 @@
   <p>
     <b>Name</b>: {{ restaurant.name }}<br>
     <b>Votes</b>: {{ restaurant.vote_score|default_if_none:"&nbsp;" }}
-      <i class="material-icons">arrow_upward</i>
-      <i class="material-icons">arrow_downward</i>
-      <i class="material-icons">thumb_down</i>
+      <i class="material-icons arrow_upward">arrow_upward</i>
+      <i class="material-icons arrow_downward">arrow_downward</i>
+      <i class="material-icons thumb_down">thumb_down</i>
     <br>
     <b>Contact</b>: {{ restaurant.contact|default_if_none:"&nbsp;" }}<br>
     <b>Website</b>: {{ restaurant.website|default_if_none:"&nbsp;" }}<br>
@@ -33,7 +34,8 @@
       <div class="review">
         <b>
           {% ifequal review.user|slugify request.user|slugify %}
-            * {# Special symbol if it's your own review #}
+            <i class="material-icons">face</i>
+            {# Special symbol if it's your own review #}
           {% endifequal %}
         </b>
         <small><b>{{ review.user }}</b> added review on {{ review.posted_at }}</small>
@@ -51,15 +53,4 @@
       <hr>
     {% endfor %}
   </p>
-  <style>
-    .review {
-      margin-left: 10px;
-    }
-    .comments {
-      margin-left: 40px;
-    }
-    .comment-text {
-      margin-left: 10px;
-    }
-  </style>
 {% endblock content %}
