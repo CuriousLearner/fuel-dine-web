@@ -9,13 +9,13 @@ from django.conf import settings
 from rest_framework import status
 from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.renderers import TemplateHTMLRenderer, JSONRenderer
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.views import APIView
 
 
-from .models import Restaurant, Review, Comment
+from .models import Restaurant, Review, Comment, ThumbDown, Visit
 from .serializers import (
     RestaurantSerializer, ReviewSerializer, CommentSerializer,
     ReviewWithTextSerializer, CommentWithTextSerializer,
@@ -44,10 +44,8 @@ class AddRestaurantView(APIView):
 
     The template uses forms support for adding restaurant via geolocating or
     reverse geolocating.
-
-    Supports both Template Responses and JSON serialization.
     """
-    renderer_classes = (TemplateHTMLRenderer, JSONRenderer)
+    renderer_classes = (TemplateHTMLRenderer,)
     template_name = 'restaurants/add_restaurant_geocoding.html'
 
     def get(self, request):
@@ -78,10 +76,8 @@ class AddReviewView(APIView):
 
     Default TemplateHTMLRenderer would render form for adding review to a
     particular restaurant.
-
-    Supports both Template Responses and JSON serialization.
     """
-    renderer_classes = (TemplateHTMLRenderer, JSONRenderer)
+    renderer_classes = (TemplateHTMLRenderer,)
     template_name = 'restaurants/add_review_form.html'
 
     def get(self, request, pk):
@@ -108,11 +104,9 @@ class AddCommentView(APIView):
     """APIView for reading and adding a new review instance.
 
     Default TemplateHTMLRenderer would render form for adding comment to a
-    particular review.
-
-    Supports both Template Responses and JSON serialization.
+    particular review..
     """
-    renderer_classes = (TemplateHTMLRenderer, JSONRenderer)
+    renderer_classes = (TemplateHTMLRenderer,)
     template_name = 'restaurants/add_comment_form.html'
 
     def get(self, request, pk):
@@ -176,6 +170,7 @@ class CommentCreateView(CreateAPIView):
 
 
 @api_view(['POST'])
+@renderer_classes((JSONRenderer,))
 def vote_for_restaurant(request, pk, action):
     """API for up vote or down vote a particular Restaurant.
 
@@ -202,6 +197,12 @@ def vote_for_restaurant(request, pk, action):
             status=status.HTTP_404_NOT_FOUND
         )
     vote_casted = False
+
+    if restaurant.votes.exists(user_id):
+        return Response(
+            data={'error': 'You have casted vote before for this restaurant'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
     if action == 'up':
         restaurant.votes.up(user_id=user_id)
         vote_casted = True
@@ -214,10 +215,86 @@ def vote_for_restaurant(request, pk, action):
             data={'data': 'Vote casted successfully'},
             status=status.HTTP_201_CREATED
         )
-
     else:
         return Response(
             data={'error': 'Unknown action for casting vote'},
             status=status.HTTP_400_BAD_REQUEST
         )
 
+
+@api_view(['POST'])
+@renderer_classes((JSONRenderer,))
+def thumbs_down_for_restaurant(request, pk):
+    """API for thumbs down for a particular Restaurant.
+
+    :param request: HttpRequest Object.
+    :param pk: Primary key of Restaurant.
+    :return: Return 201 status on successful vote cast & JSON Response as:
+    {
+        'data': 'Restaurant thumbs down successfully'
+    }
+    Return 400 status on Unknown action & JSON Response as:
+    {
+        'error': 'Restaurant already thumbs down by you'
+    }
+    """
+    user = request.user.profile
+    try:
+        restaurant = Restaurant.objects.get(id=pk)
+    except Restaurant.DoesNotExist:
+        return Response(
+            data={'error': 'Restaurant does not exist'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    # Try getting a thumb down if it exists or create one and return
+    # appropriate response based on value of `created`.
+    thumb_down, created = ThumbDown.objects.get_or_create(restaurant=restaurant, user=user)
+    if created:
+        return Response(
+            data={'data': 'Restaurant thumbs down successfully'},
+            status=status.HTTP_201_CREATED
+        )
+
+    return Response(
+        data={'error': 'Restaurant already thumbs down by you'},
+        status=status.HTTP_400_BAD_REQUEST
+    )
+
+
+@api_view(['POST'])
+@renderer_classes((JSONRenderer,))
+def mark_restaurant_visited(request, pk):
+    """API for marking restaurant visited for the user.
+
+    :param request: HttpRequest Object.
+    :param pk: Primary key of Restaurant.
+    :return: Return 201 status on successful vote cast & JSON Response as:
+    {
+        'data': 'Visit marked successfully for this restaurant'
+    }
+
+    Return 400 status on Unknown action & JSON Response as:
+    {
+        'error': 'Visit already marked for this restaurant'
+    }
+    """
+    user = request.user.profile
+    try:
+        restaurant = Restaurant.objects.get(id=pk)
+    except Restaurant.DoesNotExist:
+        return Response(
+            data={'error': 'Restaurant does not exist'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    # Try getting a visit if it exists or create one and return appropriate
+    # response based on value of `created`.
+    visit, created = Visit.objects.get_or_create(restaurant=restaurant, user=user)
+    if created:
+        return Response(
+            data={'data': 'Visit marked successfully for this restaurant'},
+            status=status.HTTP_201_CREATED
+        )
+    return Response(
+        data={'error': 'Visit already marked for this restaurant'},
+        status=status.HTTP_400_BAD_REQUEST
+    )
