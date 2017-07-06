@@ -14,9 +14,14 @@ function initMap() {
 function fill_restaurant_form(address, latitude, longitude) {
   // fills the address, longitude and latitude as retrieved from Google
   // Geolocation API to improve user experience.
-  document.getElementsByName('address')[0].value = address;
-  document.getElementsByName('lat')[0].value = latitude;
-  document.getElementsByName('lon')[0].value = longitude;
+  document.getElementById('id_address').value = address;
+  document.getElementById('id_lat').value = latitude;
+  document.getElementById('id_lon').value = longitude;
+  // Update Materialize form text fields to consistently move labels up on
+  // activating the element.
+  $(function() {
+    Materialize.updateTextFields();
+  });
 }
 
 function geocodeLatLng(geocoder, map, infowindow) {
