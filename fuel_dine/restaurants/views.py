@@ -1,172 +1,82 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.views.generic import DetailView
-from django.shortcuts import get_object_or_404, redirect
-from django.urls import reverse
+from django.views.generic import TemplateView
 from django.conf import settings
 
 from rest_framework import status
-from rest_framework.generics import CreateAPIView, ListAPIView
-from rest_framework.renderers import TemplateHTMLRenderer, JSONRenderer
+from rest_framework.generics import (
+    CreateAPIView, ListCreateAPIView, RetrieveAPIView
+)
+from rest_framework.renderers import JSONRenderer
 from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
-from rest_framework.views import APIView
 
-
-from .models import Restaurant, Review, Comment, ThumbDown, Visit
+from .models import Restaurant, ThumbDown, Visit
 from .serializers import (
-    RestaurantSerializer, ReviewSerializer, CommentSerializer,
-    ReviewWithTextSerializer, CommentWithTextSerializer,
-    RestaurantFormSerializer
+    RestaurantSerializer, ReviewSerializer, CommentSerializer
 )
 
-# Create your views here.
 
-
-class RestaurantView(ListAPIView):
-    """Restaurant Listing API for home page.
-
-    Renders restaurants/index.html by default. Also support JSON serialization.
+class RestaurantView(ListCreateAPIView):
+    """Restaurant Listing and creating Restaurant resource.
+    Listing
     """
     queryset = Restaurant.objects.filter(is_active=True)
     serializer_class = RestaurantSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
-    renderer_classes = (TemplateHTMLRenderer, JSONRenderer)
-    template_name = "restaurants/index.html"
+    renderer_classes = (JSONRenderer,)
+
+    def get_queryset(self):
+        # Do not display restaurants to user that are thumbs down by them.
+        qs = ThumbDown.objects.filter(user=self.request.user.profile.id)
+        restaurant_thumbdown_list = list(qs.values_list('restaurant', flat=True))
+
+        return Restaurant.objects.filter(
+            is_active=True
+        ).exclude(id__in=restaurant_thumbdown_list)
 
 
-class AddRestaurantView(APIView):
-    """APIView for reading and adding a new restaurant instance.
-
-    Default TemplateHTMLRenderer would render form for adding restaurant.
-
-    The template uses forms support for adding restaurant via geolocating or
-    reverse geolocating.
+class ReviewView(CreateAPIView):
+    """API for creating reviews for restaurants.
     """
-    renderer_classes = (TemplateHTMLRenderer,)
+    serializer_class = ReviewSerializer
+
+
+class CommentView(CreateAPIView):
+    """API for posting comments on reviews.
+    """
+    serializer_class = CommentSerializer
+
+
+class RestaurantGeocodingTemplate(TemplateView):
     template_name = 'restaurants/add_restaurant_geocoding.html'
 
-    def get(self, request):
-        serializer = RestaurantFormSerializer()
-        if request.get_full_path() == reverse('restaurant-add-geo'):
-            js_file_name = 'geocode.js'
-        else:
-            js_file_name = 'reverse_geocode.js'
-
-        return Response({
-            'serializer': serializer,
-            'js_file_name': js_file_name,
-            'GOOGLE_SERVICES_API_KEY': settings.GOOGLE_SERVICES_API_KEY
-        })
-
-    def post(self, request):
-        serializer = RestaurantFormSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(
-                {'serializer': serializer}
-            )
-        serializer.save()
-        return redirect('thanks')
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['js_file_name'] = 'geocode.js'
+        context['GOOGLE_SERVICES_API_KEY'] = settings.GOOGLE_SERVICES_API_KEY
+        return context
 
 
-class AddReviewView(APIView):
-    """APIView for reading and adding a new review instance.
+class RestaurantReverseGeocodingTemplate(TemplateView):
+    template_name = 'restaurants/add_restaurant_geocoding_reverse.html'
 
-    Default TemplateHTMLRenderer would render form for adding review to a
-    particular restaurant.
-    """
-    renderer_classes = (TemplateHTMLRenderer,)
-    template_name = 'restaurants/add_review_form.html'
-
-    def get(self, request, pk):
-        serializer = ReviewWithTextSerializer()
-        return Response({'serializer': serializer, 'restaurant': pk})
-
-    def post(self, request, pk):
-        restaurant = get_object_or_404(Restaurant, pk=pk)
-        data = dict(request.data)
-        data['text'] = data['text'][0]
-        data['restaurant'] = restaurant.pk
-        data['user'] = request.user.profile.pk
-        serializer = ReviewSerializer(data=data)
-        if not serializer.is_valid():
-            serializer = ReviewWithTextSerializer()
-            return Response(
-                {'serializer': serializer, 'restaurant': pk}
-            )
-        serializer.save()
-        return redirect('thanks')
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['js_file_name'] = 'reverse_geocode.js'
+        context['GOOGLE_SERVICES_API_KEY'] = settings.GOOGLE_SERVICES_API_KEY
+        return context
 
 
-class AddCommentView(APIView):
-    """APIView for reading and adding a new review instance.
-
-    Default TemplateHTMLRenderer would render form for adding comment to a
-    particular review..
-    """
-    renderer_classes = (TemplateHTMLRenderer,)
-    template_name = 'restaurants/add_comment_form.html'
-
-    def get(self, request, pk):
-        serializer = CommentWithTextSerializer()
-        return Response({'serializer': serializer, 'review': pk})
-
-    def post(self, request, pk):
-        review = get_object_or_404(Review, pk=pk)
-        data = dict(request.data)
-        data['text'] = data['text'][0]
-        data['review'] = review.pk
-        data['user'] = request.user.profile.pk
-        serializer = CommentSerializer(data=data)
-        if not serializer.is_valid():
-            serializer = CommentWithTextSerializer()
-            return Response(
-                {'serializer': serializer, 'review': pk}
-            )
-        serializer.save()
-        return redirect('thanks')
-
-
-class ReviewView(ListAPIView):
-    """Review Listing API
-    """
-    queryset = Review.objects.all()
-    serializer_class = ReviewSerializer
-    permission_classes = (IsAuthenticated,)
-
-
-class RestaurantDetailView(DetailView):
+class RestaurantDetailView(RetrieveAPIView):
     """Restaurant Detail API to be displayed on Restaurant Display page
     along with reviews and comments.
     """
-    model = Restaurant
     permission_classes = (IsAuthenticated,)
-
-
-class RestaurantCreateView(CreateAPIView):
-    """API to create restaurant
-    """
-    model = Restaurant
+    queryset = Restaurant.objects.all()
     serializer_class = RestaurantSerializer
-    permission_classes = (IsAuthenticated,)
-
-
-class ReviewCreateView(CreateAPIView):
-    """API to post new Reviews for Restaurants
-    """
-    model = Review
-    serializer_class = ReviewSerializer
-    permission_classes = (IsAuthenticated,)
-
-
-class CommentCreateView(CreateAPIView):
-    """API to post new comments on Reviews
-    """
-    model = Comment
-    serializer_class = CommentSerializer
-    permission_classes = (IsAuthenticated,)
 
 
 @api_view(['POST'])
@@ -297,4 +207,61 @@ def mark_restaurant_visited(request, pk):
     return Response(
         data={'error': 'Visit already marked for this restaurant'},
         status=status.HTTP_400_BAD_REQUEST
+    )
+
+
+@api_view(['GET'])
+@renderer_classes((JSONRenderer,))
+def who_am_i(request):
+    """API for returning the email of current user. This is for the
+    requirement of displaying special symbol with review that are posted by
+    the current logged in user.
+
+    :param request: HttpRequest Object.
+    """
+    email = request.user.email
+    return Response(
+        data={'email': email},
+        status=status.HTTP_200_OK
+    )
+
+
+@api_view(['GET'])
+@renderer_classes((JSONRenderer,))
+def select_restaurant_for_dining_based_on_votes(request):
+    """Get top voted restaurants to choose among the best restaurants for
+    dining.
+
+    :param request: HttpRequest Object.
+    """
+    restaurant_id_list = list(
+        ThumbDown.objects.all().values_list('restaurant', flat=True)
+    )
+    restaurants = Restaurant.objects.all()\
+        .exclude(id__in=restaurant_id_list).order_by('-vote_score')
+    serializer = RestaurantSerializer(restaurants, many=True)
+    return Response(
+        data={'result': serializer.data},
+        status=status.HTTP_200_OK
+    )
+
+
+@api_view(['DELETE'])
+@renderer_classes((JSONRenderer,))
+def reset_vote_count_for_restaurants(request):
+    """Reset vote count for all restaurants done by current user to choose a
+    new restaurant next time for dining.
+
+    :param request: HttpRequest Object.
+    """
+    # TODO: Move this task to be asynchronous via Celery.
+    # TODO: Enable resetting votes for all users in all restaurants.
+    restaurants = Restaurant.objects.all()
+    restaurants.update(num_vote_up=0, num_vote_down=0, vote_score=0)
+    user = request.user
+    for restaurant in restaurants:
+        restaurant.votes.delete(user_id=None)
+    return Response(
+        data={'result': "Votes reset successfully!"},
+        status=status.HTTP_200_OK
     )

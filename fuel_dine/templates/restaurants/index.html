@@ -4,6 +4,9 @@
 {% load rest_framework %}
 {% block title %}{% trans 'Home' %} • {{ block.super }}{% endblock title %}
 {% block body_classes %}{{ block.super}} page-home {% endblock body_classes %}
+{% block onloadfunction %}
+  populateRestaurantList();
+{% endblock onloadfunction %}
 {% block content %}
   <p>
     {% trans 'Welcome to Fuel Dine restaurants page' %}
@@ -12,28 +15,25 @@
     {% endif %}
   </p>
   <p>You can add a new restaurant by <a href="{% url 'restaurant-add-geo' %}">geocoding</a> or
-    <a href="{% url 'restaurant-add-geo-rev' %}">reverse geocoding</a> to the app.</p>
-  {% if not results %}
-    <p>There are no restaurants to display.</p>
-  {% endif %}
-
-  {% for restaurant in results %}
-    <div class="row">
-      <div class="col s12 m12">
-        <div class="card blue-grey darken-1">
-          <div class="card-content white-text">
-            <span class="card-title">{{restaurant.name}}</span>
-              <p>Votes: {{ restaurant.vote_score }}</p>
-              <p>Contact: {{ restaurant.contact|default_if_none:"&nbsp;" }}</p>
-              <p>Website: {{ restaurant.website|default_if_none:"&nbsp;" }}</p>
-              <p>Description: {{ restaurant.description|default_if_none:"&nbsp;" }}</p>
-          </div>
-          <div class="card-action">
-            <a href="{% url 'restaurant-detail' pk=restaurant.id %}">See details for this restaurant</a>
-          </div>
-        </div>
+    <a href="{% url 'restaurant-add-geo-rev' %}">reverse geocoding</a> to the app.
+  </p>
+  <button data-target="modal1" class="btn" id="vote-count-res">Get top
+    restaurant for dining</button>
+  <a class="waves-effect waves-green btn" id="reset-vote-count">Click here to reset vote count</a>
+  <div id="reset-count-res"></div>
+  <p>Here is the list of restaurants:</p>
+  <div id="restaurant-list"></div>
+  <div id="restaurant-dine-result">
+    <!-- Modal Structure -->
+    <div id="modal1" class="modal">
+      <div class="modal-content">
+        <h4>Top Restaurants for dining:</h4>
+        <div id="modal-content-res"></div>
+      </div>
+      <div class="modal-footer">
+        <a href="#!" class="modal-action modal-close waves-effect
+        waves-green btn-flat">Close</a>
       </div>
     </div>
-  {% endfor %}
-
+  </div>
 {% endblock content %}

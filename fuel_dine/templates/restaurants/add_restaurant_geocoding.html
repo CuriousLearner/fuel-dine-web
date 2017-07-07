@@ -11,13 +11,8 @@
       <input id="address" type="textbox" value="Sydney, NSW">
       <input id="submit" type="button" value="Geocode">
     </div>
-    <div id="map"></div>
-
-    <form action="{% url 'restaurant-add-geo' %}" method="post">
-      {% csrf_token %}
-      {% render_form serializer %}
-      <input class="waves-effect waves-light btn" type="submit"
-             value="Submit" />
-    </form>
   </div>
+  {% block add_restaurant_form %}
+    {{ block.super }}
+  {% endblock %}
 {% endblock content %}

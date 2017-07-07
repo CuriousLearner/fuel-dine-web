@@ -86,7 +86,9 @@ class Visit(models.Model):
 
 class Review(ReviewComments):
     restaurant = models.ForeignKey(Restaurant, null=False, blank=False,
-                                   verbose_name=_(u'restaurant'))
+                                   verbose_name=_(u'restaurant'),
+                                   related_name='reviews',
+                                   on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = "review"
@@ -99,7 +101,9 @@ class Review(ReviewComments):
 
 class Comment(ReviewComments):
     review = models.ForeignKey(Review, null=False, blank=False,
-                               verbose_name=_(u'review'))
+                               verbose_name=_(u'review'),
+                               related_name='comments',
+                               on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = "comment"

@@ -11,13 +11,8 @@
       <input id="latlng" type="text" value="40.714224,-73.961452">
       <input id="submit" type="button" value="Reverse Geocode">
     </div>
-    <div id="map"></div>
-
-    <form action="{% url 'restaurant-add-geo-rev' %}" method="post">
-      {% csrf_token %}
-      {% render_form serializer %}
-      <input class="waves-effect waves-light btn" type="submit"
-             value="Submit" />
-    </form>
   </div>
+  {% block add_restaurant_form %}
+    {{ block.super }}
+  {% endblock %}
 {% endblock content %}
