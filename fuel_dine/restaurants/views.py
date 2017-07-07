@@ -29,6 +29,10 @@ class RestaurantView(ListCreateAPIView):
     renderer_classes = (JSONRenderer,)
 
     def get_queryset(self):
+        # return all restaurants for anonymous user
+        if self.request.user.is_anonymous():
+            return Restaurant.objects.filter(is_active=True)
+
         # Do not display restaurants to user that are thumbs down by them.
         qs = ThumbDown.objects.filter(user=self.request.user.profile.id)
         restaurant_thumbdown_list = list(qs.values_list('restaurant', flat=True))
@@ -42,12 +46,14 @@ class ReviewView(CreateAPIView):
     """API for creating reviews for restaurants.
     """
     serializer_class = ReviewSerializer
+    permission_classes = (IsAuthenticated,)
 
 
 class CommentView(CreateAPIView):
     """API for posting comments on reviews.
     """
     serializer_class = CommentSerializer
+    permission_classes = (IsAuthenticated,)
 
 
 class RestaurantGeocodingTemplate(TemplateView):

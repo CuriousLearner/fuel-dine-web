@@ -105,6 +105,8 @@ function populateRestaurantList() {
   .done(function(msg) {
     var results = msg["results"];
 
+    // Clear message of no restaurants to display from the DOM
+    $('#restaurant-list').text("");
     for (var i=0; i < results.length; i++) {
       var html_text = `
         <div class="row">

@@ -25,15 +25,15 @@ urlpatterns = [
 
     url(r'^api/restaurant/(?P<pk>\d+)/vote/(?P<action>\w+)/$',
         views.vote_for_restaurant,
-        name='comment-create'),
+        name='restaurant-vote'),
 
     url(r'^api/restaurant/(?P<pk>\d+)/thumbdown/$',
         views.thumbs_down_for_restaurant,
-        name='comment-create'),
+        name='restaurant-thumbdown'),
 
     url(r'^api/restaurant/(?P<pk>\d+)/visited/$',
         views.mark_restaurant_visited,
-        name='comment-create'),
+        name='restaurant-visited'),
 
     url(r'^api/me/$', views.who_am_i,
         name='who-am-i'),

@@ -38,16 +38,3 @@ def test_blank_home_page(client):
     response = client.get(url)
     assert response.status_code == status.HTTP_200_OK
     assert 'There are no restaurants to display.' in response.content.decode('utf-8')
-
-
-def test_home_page_with_restaurants(client):
-    url = reverse('home')
-    restaurant = Restaurant.objects.create(
-        name="Sagar Ratna", lat=17.388822, lon=-293.2333, is_active=True
-    )
-    response = client.get(url)
-    assert response.status_code == status.HTTP_200_OK
-    assert Restaurant.objects.count() == 1
-    assert 'Sagar Ratna' in response.content.decode('utf-8')
-    restaurant.delete()
-
