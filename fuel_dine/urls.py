@@ -13,6 +13,8 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.views.generic import TemplateView
 
+from rest_framework.documentation import include_docs_urls
+
 # fuel_dine Stuff
 from fuel_dine.base import views as base_views
 
@@ -31,6 +33,8 @@ urlpatterns = [
     # Your stuff: custom urls go here
 
     url(r'^', include(restaurant_urls.urlpatterns)),
+    # REST API Docs
+    url(r'^docs/', include_docs_urls(title='Fuel Dine API'))
 ]
 
 urlpatterns += [

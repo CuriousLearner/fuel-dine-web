@@ -8,7 +8,7 @@ from rest_framework import status
 from rest_framework.generics import (
     CreateAPIView, ListCreateAPIView, RetrieveAPIView
 )
-from rest_framework.renderers import JSONRenderer
+from rest_framework.renderers import JSONRenderer, DocumentationRenderer
 from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
@@ -80,7 +80,7 @@ class RestaurantDetailView(RetrieveAPIView):
 
 
 @api_view(['POST'])
-@renderer_classes((JSONRenderer,))
+@renderer_classes((JSONRenderer, DocumentationRenderer))
 def vote_for_restaurant(request, pk, action):
     """API for up vote or down vote a particular Restaurant.
 
@@ -133,7 +133,7 @@ def vote_for_restaurant(request, pk, action):
 
 
 @api_view(['POST'])
-@renderer_classes((JSONRenderer,))
+@renderer_classes((JSONRenderer, DocumentationRenderer))
 def thumbs_down_for_restaurant(request, pk):
     """API for thumbs down for a particular Restaurant.
 
@@ -172,7 +172,7 @@ def thumbs_down_for_restaurant(request, pk):
 
 
 @api_view(['POST'])
-@renderer_classes((JSONRenderer,))
+@renderer_classes((JSONRenderer, DocumentationRenderer))
 def mark_restaurant_visited(request, pk):
     """API for marking restaurant visited for the user.
 
@@ -211,7 +211,7 @@ def mark_restaurant_visited(request, pk):
 
 
 @api_view(['GET'])
-@renderer_classes((JSONRenderer,))
+@renderer_classes((JSONRenderer, DocumentationRenderer))
 def who_am_i(request):
     """API for returning the email of current user. This is for the
     requirement of displaying special symbol with review that are posted by
@@ -227,7 +227,7 @@ def who_am_i(request):
 
 
 @api_view(['GET'])
-@renderer_classes((JSONRenderer,))
+@renderer_classes((JSONRenderer, DocumentationRenderer))
 def select_restaurant_for_dining_based_on_votes(request):
     """Get top voted restaurants to choose among the best restaurants for
     dining.
@@ -247,7 +247,7 @@ def select_restaurant_for_dining_based_on_votes(request):
 
 
 @api_view(['DELETE'])
-@renderer_classes((JSONRenderer,))
+@renderer_classes((JSONRenderer, DocumentationRenderer))
 def reset_vote_count_for_restaurants(request):
     """Reset vote count for all restaurants done by current user to choose a
     new restaurant next time for dining.
