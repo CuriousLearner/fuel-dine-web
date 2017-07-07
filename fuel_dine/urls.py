@@ -13,7 +13,7 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.views.generic import TemplateView
 
-from rest_framework.documentation import include_docs_urls
+from rest_framework.authtoken import views
 
 # fuel_dine Stuff
 from fuel_dine.base import views as base_views
@@ -31,7 +31,7 @@ urlpatterns = [
     url(r'^accounts/logout/$', auth_views.logout, {'next_page': '/'},  name='logout'),
     url(r'^about/$', TemplateView.as_view(template_name='pages/about.html'), name='about'),
     # Your stuff: custom urls go here
-
+    url(r'^api-token-auth/', views.obtain_auth_token),
     url(r'^', include(restaurant_urls.urlpatterns)),
     # REST API Docs
     # url(r'^docs/', include_docs_urls(title='Fuel Dine API'))
