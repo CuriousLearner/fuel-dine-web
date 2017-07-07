@@ -3,7 +3,32 @@ fuel_dine
 
 __Version:__ 0.0.0
 
-Decide whether team should dine in a restaurant
+Decide where the team should dine in the restaurant.
+
+The API `docs` are available at [docs](http://localhost:8000) once the server is running locally.
+
+There is a front-end app for demonstration purpose. The App is refactored to use AJAX requests.
+
+The features of the app are:
+
+ - Ability to add restaurant based on geo-coding and reverse geo-coding.
+ - Keep a track of visited restaurants by user.
+ - Ability to read/write reviews. A special symbol is displayed if it's your own review.
+ - Ability to comment on reviews.
+ - Ability to thumbs down a restaurant. The restaurant that is thumbs down would not appear in listing or results for the user.
+ - User model is extended as profile to add more functionality.
+ - REST API that can be integrated with any external service.
+ 
+The tests can be run via `py.test` that tests various API end-points.
+
+TODO
+----
+
+- The current app use `BasicAuthentication`. The Authentication and Authorization still needs to be improved.
+- The ability to reset vote counter for all restaurants and for all users.
+    - Currently this is time consuming and removed from the app.
+    An [issue is created on django-vote](https://github.com/shanbay/django-vote/issues/53)
+    to know a best alternative for this extra feature.
 
 ## Getting up and running
 
