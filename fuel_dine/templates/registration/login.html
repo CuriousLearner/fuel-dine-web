@@ -2,11 +2,16 @@
 
 {% block title %}Login{% endblock %}
 
+{% block header %}
+  <h1><a href="{% url 'home' %}">Fuel Dine</a></h1>
+{% endblock %}
+
 {% block content %}
   <h2>Login</h2>
   <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit">Login</button>
+    <button type="submit waves-effect
+        waves-green btn-flat">Login</button>
   </form>
 {% endblock %}

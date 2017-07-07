@@ -33,6 +33,8 @@ INSTALLED_APPS = (
     # To use material UI
     'material',
 
+    'rest_framework_docs',
+
     'fuel_dine.base',
     'fuel_dine.users',
 

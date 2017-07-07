@@ -26,6 +26,16 @@ function displayDecreasedVoteCount() {
   $('.vote-count').text(parseInt($('.vote-count').text()) - 1);
 }
 
+function tryDisplayErrorAlert(msg) {
+  try {
+    alert(msg["responseJSON"]["error"]);
+  }
+  catch(err) {
+    console.log(err);
+    alert("Oops! Something went wrong! Please try again later");
+  }
+}
+
 function normalizeDate(d) {
   return d.toString();
 }
@@ -42,8 +52,7 @@ function voteUp(restaurant_id) {
     displayIncreasedVoteCount()
   })
   .error(function(msg) {
-    alert("Something went wrong! Please try again later");
-    console.log(msg)
+    tryDisplayErrorAlert(msg);
   });
 }
 
@@ -59,8 +68,7 @@ function voteDown(restaurant_id) {
     displayDecreasedVoteCount()
   })
   .error(function(msg) {
-    alert("Something went wrong! Please try again later");
-    console.log(msg)
+    tryDisplayErrorAlert(msg);
   });
 }
 
@@ -75,8 +83,7 @@ function thumbsDown(restaurant_id) {
     alert("You just thumbs down this restaurant!");
   })
   .error(function(msg) {
-    alert("Something went wrong! Please try again later");
-    console.log(msg)
+    tryDisplayErrorAlert(msg);
   });
 }
 
@@ -91,8 +98,7 @@ function visited(restaurant_id) {
     alert("You just marked this restaurant as visited!");
   })
   .error(function(msg) {
-    alert("Something went wrong! Please try again later");
-    console.log(msg)
+    tryDisplayErrorAlert(msg);
   });
 }
 
@@ -105,6 +111,8 @@ function populateRestaurantList() {
   .done(function(msg) {
     var results = msg["results"];
 
+    // Clear message of no restaurants to display from the DOM
+    $('#restaurant-list').text("");
     for (var i=0; i < results.length; i++) {
       var html_text = `
         <div class="row">
@@ -413,19 +421,21 @@ $('#vote-count-res').click(function() {
 });
 
 
-$('#reset-vote-count').click(function() {
-  $.ajax({
-    method: "DELETE",
-    url: "api/votes/reset/",
-    data: {"csrfmiddlewaretoken": csrftoken}
-  })
-  .done(function(msg) {
-    console.log(msg);
-    $('#reset-count-res').text("Count reset successfully!");
+// This API would take much time, so dropping this extra feature for now.
 
-  })
-  .error(function(msg) {
-    console.log(msg);
-    $('#reset-count-res').text("Oops, something went wrong!");
-  });
-});
+//$('#reset-vote-count').click(function() {
+//  $.ajax({
+//    method: "DELETE",
+//    url: "api/votes/reset/",
+//    data: {"csrfmiddlewaretoken": csrftoken}
+//  })
+//  .done(function(msg) {
+//    console.log(msg);
+//    $('#reset-count-res').text("Count reset successfully!");
+//
+//  })
+//  .error(function(msg) {
+//    console.log(msg);
+//    $('#reset-count-res').text("Oops, something went wrong!");
+//  });
+//});

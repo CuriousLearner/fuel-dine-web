@@ -8,7 +8,7 @@ from rest_framework import status
 from rest_framework.generics import (
     CreateAPIView, ListCreateAPIView, RetrieveAPIView
 )
-from rest_framework.renderers import JSONRenderer
+from rest_framework.renderers import JSONRenderer, DocumentationRenderer
 from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
@@ -29,6 +29,10 @@ class RestaurantView(ListCreateAPIView):
     renderer_classes = (JSONRenderer,)
 
     def get_queryset(self):
+        # return all restaurants for anonymous user
+        if self.request.user.is_anonymous():
+            return Restaurant.objects.filter(is_active=True)
+
         # Do not display restaurants to user that are thumbs down by them.
         qs = ThumbDown.objects.filter(user=self.request.user.profile.id)
         restaurant_thumbdown_list = list(qs.values_list('restaurant', flat=True))
@@ -42,12 +46,14 @@ class ReviewView(CreateAPIView):
     """API for creating reviews for restaurants.
     """
     serializer_class = ReviewSerializer
+    permission_classes = (IsAuthenticated,)
 
 
 class CommentView(CreateAPIView):
     """API for posting comments on reviews.
     """
     serializer_class = CommentSerializer
+    permission_classes = (IsAuthenticated,)
 
 
 class RestaurantGeocodingTemplate(TemplateView):
@@ -80,7 +86,7 @@ class RestaurantDetailView(RetrieveAPIView):
 
 
 @api_view(['POST'])
-@renderer_classes((JSONRenderer,))
+@renderer_classes((JSONRenderer, DocumentationRenderer))
 def vote_for_restaurant(request, pk, action):
     """API for up vote or down vote a particular Restaurant.
 
@@ -133,7 +139,7 @@ def vote_for_restaurant(request, pk, action):
 
 
 @api_view(['POST'])
-@renderer_classes((JSONRenderer,))
+@renderer_classes((JSONRenderer, DocumentationRenderer))
 def thumbs_down_for_restaurant(request, pk):
     """API for thumbs down for a particular Restaurant.
 
@@ -172,7 +178,7 @@ def thumbs_down_for_restaurant(request, pk):
 
 
 @api_view(['POST'])
-@renderer_classes((JSONRenderer,))
+@renderer_classes((JSONRenderer, DocumentationRenderer))
 def mark_restaurant_visited(request, pk):
     """API for marking restaurant visited for the user.
 
@@ -211,7 +217,7 @@ def mark_restaurant_visited(request, pk):
 
 
 @api_view(['GET'])
-@renderer_classes((JSONRenderer,))
+@renderer_classes((JSONRenderer, DocumentationRenderer))
 def who_am_i(request):
     """API for returning the email of current user. This is for the
     requirement of displaying special symbol with review that are posted by
@@ -227,7 +233,7 @@ def who_am_i(request):
 
 
 @api_view(['GET'])
-@renderer_classes((JSONRenderer,))
+@renderer_classes((JSONRenderer, DocumentationRenderer))
 def select_restaurant_for_dining_based_on_votes(request):
     """Get top voted restaurants to choose among the best restaurants for
     dining.
@@ -246,22 +252,24 @@ def select_restaurant_for_dining_based_on_votes(request):
     )
 
 
-@api_view(['DELETE'])
-@renderer_classes((JSONRenderer,))
-def reset_vote_count_for_restaurants(request):
-    """Reset vote count for all restaurants done by current user to choose a
-    new restaurant next time for dining.
+# This API would take much time, so dropping this extra feature for now.
 
-    :param request: HttpRequest Object.
-    """
-    # TODO: Move this task to be asynchronous via Celery.
-    # TODO: Enable resetting votes for all users in all restaurants.
-    restaurants = Restaurant.objects.all()
-    restaurants.update(num_vote_up=0, num_vote_down=0, vote_score=0)
-    user = request.user
-    for restaurant in restaurants:
-        restaurant.votes.delete(user_id=None)
-    return Response(
-        data={'result': "Votes reset successfully!"},
-        status=status.HTTP_200_OK
-    )
+# @api_view(['DELETE'])
+# @renderer_classes((JSONRenderer, DocumentationRenderer))
+# def reset_vote_count_for_restaurants(request):
+#     """Reset vote count for all restaurants done by current user to choose a
+#     new restaurant next time for dining.
+#
+#     :param request: HttpRequest Object.
+#     """
+#     # TODO: Move this task to be asynchronous via Celery.
+#     # TODO: Enable resetting votes for all users in all restaurants.
+#     restaurants = Restaurant.objects.all()
+#     restaurants.update(num_vote_up=0, num_vote_down=0, vote_score=0)
+#     user = request.user
+#     for restaurant in restaurants:
+#         restaurant.votes.delete(user_id=None)
+#     return Response(
+#         data={'result': "Votes reset successfully!"},
+#         status=status.HTTP_200_OK
+#     )

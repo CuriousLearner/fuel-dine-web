@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8">
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.png' %}">
-    <title>{% block title %}fuel_dine{% endblock title %}</title>
+    <title>{% block title %}Fuel Dine{% endblock title %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="version" content="{{ site_info.RELEASE_VERSION }}">
     <meta name="description" content="{% block meta_description %}{% endblock meta_description %}">
@@ -34,7 +34,12 @@
     <![endif]-->
 
     {% block header %}
-      <h1><a href="{% url 'home' %}">fuel_dine</a></h1>
+      <h1><a href="{% url 'home' %}">Fuel Dine</a></h1>
+        {% if request.user.is_authenticated %}
+          <a href="{% url 'logout' %}" class="right-align">Logout</a>
+        {% else %}
+          <a href="{% url 'login' %}" class="right-align">Login</a>
+        {% endif %}
     {% endblock header %}
 
     {% block content %}
