@@ -3,7 +3,7 @@ fuel_dine
 
 __Version:__ 0.1.0
 
-Decide where the team should dine in the restaurant.
+Decide where the team should go for lunch. This is an MVP.
 
 The API `docs` are available at [docs](http://localhost:8000/docs) once the server is running locally.
 
@@ -29,6 +29,7 @@ TODO
 ----
 
 - The current app use `BasicAuthentication`. The Authentication and Authorization still needs to be improved.
+    - Supports token auth for external API support.
 - The ability to reset vote counter for all restaurants and for all users.
     - Currently this is time consuming and removed from the app.
     An [issue is created on django-vote](https://github.com/shanbay/django-vote/issues/53)

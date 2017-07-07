@@ -40,6 +40,7 @@ INSTALLED_APPS = (
 
     'rest_framework',  # http://www.django-rest-framework.org/
     'rest_framework_swagger',
+    'rest_framework.authtoken',
     'versatileimagefield',  # https://github.com/WGBH/django-versatileimagefield/
 
     'compressor',
@@ -107,6 +108,7 @@ REST_FRAMEWORK = {
         'anon': '10000/day',
     },
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.BasicAuthentication',
 
         # Mainly used for api debug.
