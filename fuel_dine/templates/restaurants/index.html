@@ -17,5 +17,23 @@
   <p>You can add a new restaurant by <a href="{% url 'restaurant-add-geo' %}">geocoding</a> or
     <a href="{% url 'restaurant-add-geo-rev' %}">reverse geocoding</a> to the app.
   </p>
+  <button data-target="modal1" class="btn" id="vote-count-res">Get top
+    restaurant for dining</button>
+  <a class="waves-effect waves-green btn" id="reset-vote-count">Click here to reset vote count</a>
+  <div id="reset-count-res"></div>
+  <p>Here is the list of restaurants:</p>
   <div id="restaurant-list"></div>
+  <div id="restaurant-dine-result">
+    <!-- Modal Structure -->
+    <div id="modal1" class="modal">
+      <div class="modal-content">
+        <h4>Top Restaurants for dining:</h4>
+        <div id="modal-content-res"></div>
+      </div>
+      <div class="modal-footer">
+        <a href="#!" class="modal-action modal-close waves-effect
+        waves-green btn-flat">Close</a>
+      </div>
+    </div>
+  </div>
 {% endblock content %}

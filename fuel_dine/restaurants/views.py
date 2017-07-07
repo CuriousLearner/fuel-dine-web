@@ -5,7 +5,9 @@ from django.views.generic import TemplateView
 from django.conf import settings
 
 from rest_framework import status
-from rest_framework.generics import CreateAPIView, ListCreateAPIView, RetrieveAPIView
+from rest_framework.generics import (
+    CreateAPIView, ListCreateAPIView, RetrieveAPIView
+)
 from rest_framework.renderers import JSONRenderer
 from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.response import Response
@@ -13,32 +15,39 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticate
 
 from .models import Restaurant, ThumbDown, Visit
 from .serializers import (
-    RestaurantSerializer, ReviewSerializer, CommentSerializer,
-    ReviewPOSTSerializer, CommentPOSTSerializer
+    RestaurantSerializer, ReviewSerializer, CommentSerializer
 )
 
 
 class RestaurantView(ListCreateAPIView):
     """Restaurant Listing and creating Restaurant resource.
+    Listing
     """
     queryset = Restaurant.objects.filter(is_active=True)
     serializer_class = RestaurantSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
     renderer_classes = (JSONRenderer,)
 
+    def get_queryset(self):
+        # Do not display restaurants to user that are thumbs down by them.
+        qs = ThumbDown.objects.filter(user=self.request.user.profile.id)
+        restaurant_thumbdown_list = list(qs.values_list('restaurant', flat=True))
+
+        return Restaurant.objects.filter(
+            is_active=True
+        ).exclude(id__in=restaurant_thumbdown_list)
+
 
 class ReviewView(CreateAPIView):
     """API for creating reviews for restaurants.
     """
-    queryset = ReviewSerializer
-    serializer_class = ReviewPOSTSerializer
+    serializer_class = ReviewSerializer
 
 
 class CommentView(CreateAPIView):
     """API for posting comments on reviews.
     """
-    queryset = CommentSerializer
-    serializer_class = CommentPOSTSerializer
+    serializer_class = CommentSerializer
 
 
 class RestaurantGeocodingTemplate(TemplateView):
@@ -198,4 +207,61 @@ def mark_restaurant_visited(request, pk):
     return Response(
         data={'error': 'Visit already marked for this restaurant'},
         status=status.HTTP_400_BAD_REQUEST
+    )
+
+
+@api_view(['GET'])
+@renderer_classes((JSONRenderer,))
+def who_am_i(request):
+    """API for returning the email of current user. This is for the
+    requirement of displaying special symbol with review that are posted by
+    the current logged in user.
+
+    :param request: HttpRequest Object.
+    """
+    email = request.user.email
+    return Response(
+        data={'email': email},
+        status=status.HTTP_200_OK
+    )
+
+
+@api_view(['GET'])
+@renderer_classes((JSONRenderer,))
+def select_restaurant_for_dining_based_on_votes(request):
+    """Get top voted restaurants to choose among the best restaurants for
+    dining.
+
+    :param request: HttpRequest Object.
+    """
+    restaurant_id_list = list(
+        ThumbDown.objects.all().values_list('restaurant', flat=True)
+    )
+    restaurants = Restaurant.objects.all()\
+        .exclude(id__in=restaurant_id_list).order_by('-vote_score')
+    serializer = RestaurantSerializer(restaurants, many=True)
+    return Response(
+        data={'result': serializer.data},
+        status=status.HTTP_200_OK
+    )
+
+
+@api_view(['DELETE'])
+@renderer_classes((JSONRenderer,))
+def reset_vote_count_for_restaurants(request):
+    """Reset vote count for all restaurants done by current user to choose a
+    new restaurant next time for dining.
+
+    :param request: HttpRequest Object.
+    """
+    # TODO: Move this task to be asynchronous via Celery.
+    # TODO: Enable resetting votes for all users in all restaurants.
+    restaurants = Restaurant.objects.all()
+    restaurants.update(num_vote_up=0, num_vote_down=0, vote_score=0)
+    user = request.user
+    for restaurant in restaurants:
+        restaurant.votes.delete(user_id=None)
+    return Response(
+        data={'result': "Votes reset successfully!"},
+        status=status.HTTP_200_OK
     )

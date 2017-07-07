@@ -19,11 +19,11 @@ var csrftoken = getCookie('csrftoken');
 
 
 function displayIncreasedVoteCount() {
-  $('#vote-count').text(parseInt($('#vote-count').text()) + 1);
+  $('.vote-count').text(parseInt($('.vote-count').text()) + 1);
 }
 
 function displayDecreasedVoteCount() {
-  $('#vote-count').text(parseInt($('#vote-count').text()) - 1);
+  $('.vote-count').text(parseInt($('.vote-count').text()) - 1);
 }
 
 function normalizeDate(d) {
@@ -33,7 +33,7 @@ function normalizeDate(d) {
 function voteUp(restaurant_id) {
   $.ajax({
     method: "POST",
-    url: "/api/restaurant/pk/vote/up".replace('pk', restaurant_id),
+    url: "/api/restaurant/pk/vote/up/".replace('pk', restaurant_id),
     data: {"csrfmiddlewaretoken": csrftoken}
   })
   .done(function(msg) {
@@ -42,14 +42,15 @@ function voteUp(restaurant_id) {
     displayIncreasedVoteCount()
   })
   .error(function(msg) {
-    alert(msg["responseJSON"]["error"]);
+    alert("Something went wrong! Please try again later");
+    console.log(msg)
   });
 }
 
 function voteDown(restaurant_id) {
   $.ajax({
     method: "POST",
-    url: "/api/restaurant/pk/vote/up".replace('pk', restaurant_id),
+    url: "/api/restaurant/pk/vote/down/".replace('pk', restaurant_id),
     data: {csrfmiddlewaretoken: csrftoken}
   })
   .done(function(msg) {
@@ -58,7 +59,8 @@ function voteDown(restaurant_id) {
     displayDecreasedVoteCount()
   })
   .error(function(msg) {
-    alert(msg["responseJSON"]["error"]);
+    alert("Something went wrong! Please try again later");
+    console.log(msg)
   });
 }
 
@@ -73,8 +75,8 @@ function thumbsDown(restaurant_id) {
     alert("You just thumbs down this restaurant!");
   })
   .error(function(msg) {
-    console.log(JSON.stringify(msg));
-    alert(msg["responseJSON"]["error"]);
+    alert("Something went wrong! Please try again later");
+    console.log(msg)
   });
 }
 
@@ -89,8 +91,8 @@ function visited(restaurant_id) {
     alert("You just marked this restaurant as visited!");
   })
   .error(function(msg) {
-    console.log(JSON.stringify(msg));
-    alert(msg["responseJSON"]["error"]);
+    alert("Something went wrong! Please try again later");
+    console.log(msg)
   });
 }
 
@@ -138,8 +140,25 @@ function populateRestaurantList() {
     }
   })
   .error(function(msg) {
-    console.log(JSON.stringify(msg));
-    alert(msg["responseJSON"]["error"]);
+    alert("Something went wrong! Please try again later");
+    console.log(msg)
+  });
+}
+
+var my_email = null;
+
+function get_my_email() {
+  $.ajax({
+    method: "GET",
+    url: "/api/me/"
+  })
+  .done(function(msg) {
+    console.log("Got current_user mail as " + msg["email"]);
+    my_email = msg["email"];
+  })
+  .error(function(msg) {
+    console.log("Some error occurred in getting current user mail");
+    return "admin@localhost.com";
   });
 }
 
@@ -152,10 +171,12 @@ function populateRestaurantDetail(restaurant_id) {
   .done(function(msg) {
     console.log(msg);
     var result = msg;
+    // For knowing email of current user to match it for adding special
+    // symbol to any review posted by me.
     var html_text = `
           <b>Name</b>:&nbsp; restaurant_name<br>
           <b>Votes</b>:
-          <span id="vote-count">&nbsp;restaurant_vote_score</span>
+          <span class="vote-count">&nbsp;restaurant_vote_score</span>
 
           <div class="right">
             <a class="waves-effect waves-light btn" href="#"
@@ -182,21 +203,30 @@ function populateRestaurantDetail(restaurant_id) {
         </p>
         <p>Write a <a href="post_new_review_url"><b>&nbsp;new review&nbsp;</b></a> for this restaurant now!</p>
         <hr>
-        <b>Reviews</b>:
     `;
     if(result["reviews"]) {
       for(var i in result["reviews"]) {
-        console.log(i['text']);
-        console.log("result review");
-        console.log(result["reviews"]);
-        html_text += `
-        <div class="review">
-        <b>
-            <i class="material-icons">face</i>
-        </b>
-        <small><b>`;
+        //console.log(i['text']);
+        //console.log("result review");
+        //console.log(result["reviews"]);
 
-        html_text += result["reviews"][i]["user"];
+        var current_review_user = result["reviews"][i]["user"];
+
+        html_text += `        <b>Reviews</b>:
+        <div class="review">
+        `;
+        if (my_email == current_review_user) {
+
+          // Inserts special symbol in the DOM for my own reviews.
+          html_text +=   `<b>
+              <i class="material-icons">face</i>
+          </b>
+          `;
+        }
+
+        html_text += `<small><b>`;
+
+        html_text += current_review_user;
 
         html_text += `</b>&nbsp;added review on&nbsp;`;
 
@@ -209,7 +239,7 @@ function populateRestaurantDetail(restaurant_id) {
         html_text += `<br>
         <small><a href="`;
 
-        html_text += "/review/" + result["reviews"][i]["id"] + "/comment";
+        html_text += "/review/" + result["reviews"][i]["id"] + "/comment/";
 
         html_text += `"><b>Comment on this review</b></a></small>
       </div>
@@ -220,11 +250,8 @@ function populateRestaurantDetail(restaurant_id) {
         if(result["reviews"][i]["comments"]) {
 
           for(var j in result["reviews"][i]["comments"]) {
-            console.log("J");
-            console.log(j);
             var comment = result["reviews"][i]["comments"];
-            console.log("comment");
-            console.log(comment);
+
             html_text += `<div class="comments">
                 <small><b>`;
             html_text += comment[j]["user"];
@@ -246,6 +273,7 @@ function populateRestaurantDetail(restaurant_id) {
         }
       }
     }
+
     var variable_mapping = {
       "restaurant_name": result["name"],
       "restaurant_vote_score": result["vote_score"] || 0,
@@ -253,18 +281,17 @@ function populateRestaurantDetail(restaurant_id) {
       "restaurant_website": result["website"] || '',
       "restaurant_description": result["description"] || '',
       "id": result["id"],
-      "post_new_review_url": "/restaurant/" + result["id"] + "/review"
+      "post_new_review_url": "/restaurant/" + result["id"] + "/review/"
     };
     var re = new RegExp(Object.keys(variable_mapping).join("|"),"gi");
     actual_html = html_text.replace(re, function(matched){
       return variable_mapping[matched];
     });
-    console.log(html_text);
     $('#restaurant-detail-view').append(actual_html);
   })
   .error(function(msg) {
-    console.log(JSON.stringify(msg));
-    console.log(JSON.stringify(msg));
+    alert("Something went wrong! Please try again later");
+    console.log(msg);
   });
 }
 
@@ -309,7 +336,6 @@ $("#add-review").submit(function(e) {
       "user": $('#user_id').val(),
       "csrfmiddlewaretoken": csrftoken
     };
-    console.log(data);
     $.ajax({
        type: "POST",
        url: url,
@@ -336,7 +362,6 @@ $("#add-comment").submit(function(e) {
       "user": $('#user_id').val(),
       "csrfmiddlewaretoken": csrftoken
     };
-    console.log(data);
     $.ajax({
        type: "POST",
        url: url,
@@ -354,3 +379,53 @@ $("#add-comment").submit(function(e) {
   return false;
 });
 
+
+$(document).ready(function() {
+  // the "href" attribute of the modal trigger must specify the modal ID that wants to be triggered
+  $('.modal').modal();
+});
+
+
+$('#vote-count-res').click(function() {
+  $.ajax({
+    method: "GET",
+    url: "/api/results/",
+    data: {"csrfmiddlewaretoken": csrftoken}
+  })
+  .done(function(msg) {
+    console.log(msg);
+    var result = msg["result"];
+    var html_res_text = "";
+    for (var i in result) {
+      html_res_text += "<p><b>Name</b>: " + result[i]["name"] + "</p>";
+      html_res_text += "<p><b>Contact</b>: " + result[i]["contact"] + "</p>";
+      html_res_text += "<p><b>Address</b>: " + result[i]["address"] + "</p>";
+      html_res_text += "<p><b>Votes</b>: " + result[i]["vote_score"] + "</p><hr>";
+    }
+    // Empty previous result value first and then udpate DOM with new result.
+    $('#modal-content-res').text("");
+    $('#modal-content-res').append(html_res_text);
+  })
+  .error(function(msg) {
+    console.log(msg);
+    $('#modal-content-res').text("oops! Couldn't retrieve results at this time!");
+  });
+});
+
+
+$('#reset-vote-count').click(function() {
+  $.ajax({
+    method: "DELETE",
+    url: "api/votes/reset/",
+    data: {"csrfmiddlewaretoken": csrftoken}
+  })
+  .done(function(msg) {
+    console.log(msg);
+    $('#reset-count-res').text("Count reset successfully!");
+
+  })
+  .error(function(msg) {
+    console.log(msg);
+    $('#reset-count-res').text("Oops, something went wrong!");
+  });
+});
