@@ -1,6 +1,6 @@
 # fuel_dine Documentation
 
-__Version:__ 0.0.0
+__Version:__ 0.1.0
 
 ## API
 
