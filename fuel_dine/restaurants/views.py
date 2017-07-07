@@ -252,22 +252,24 @@ def select_restaurant_for_dining_based_on_votes(request):
     )
 
 
-@api_view(['DELETE'])
-@renderer_classes((JSONRenderer, DocumentationRenderer))
-def reset_vote_count_for_restaurants(request):
-    """Reset vote count for all restaurants done by current user to choose a
-    new restaurant next time for dining.
+# This API would take much time, so dropping this extra feature for now.
 
-    :param request: HttpRequest Object.
-    """
-    # TODO: Move this task to be asynchronous via Celery.
-    # TODO: Enable resetting votes for all users in all restaurants.
-    restaurants = Restaurant.objects.all()
-    restaurants.update(num_vote_up=0, num_vote_down=0, vote_score=0)
-    user = request.user
-    for restaurant in restaurants:
-        restaurant.votes.delete(user_id=None)
-    return Response(
-        data={'result': "Votes reset successfully!"},
-        status=status.HTTP_200_OK
-    )
+# @api_view(['DELETE'])
+# @renderer_classes((JSONRenderer, DocumentationRenderer))
+# def reset_vote_count_for_restaurants(request):
+#     """Reset vote count for all restaurants done by current user to choose a
+#     new restaurant next time for dining.
+#
+#     :param request: HttpRequest Object.
+#     """
+#     # TODO: Move this task to be asynchronous via Celery.
+#     # TODO: Enable resetting votes for all users in all restaurants.
+#     restaurants = Restaurant.objects.all()
+#     restaurants.update(num_vote_up=0, num_vote_down=0, vote_score=0)
+#     user = request.user
+#     for restaurant in restaurants:
+#         restaurant.votes.delete(user_id=None)
+#     return Response(
+#         data={'result': "Votes reset successfully!"},
+#         status=status.HTTP_200_OK
+#     )

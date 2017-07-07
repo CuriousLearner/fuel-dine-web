@@ -38,8 +38,9 @@ urlpatterns = [
     url(r'^api/me/$', views.who_am_i,
         name='who-am-i'),
 
-    url(r'^api/votes/reset/$', views.reset_vote_count_for_restaurants,
-        name='reset-vote-count'),
+    # This API would take much time, so dropping this extra feature for now.
+    # url(r'^api/votes/reset/$', views.reset_vote_count_for_restaurants,
+    #     name='reset-vote-count'),
 
     url(r'^api/results/$', views.select_restaurant_for_dining_based_on_votes,
         name='choose-restaurant-for-dining'),

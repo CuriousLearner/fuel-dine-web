@@ -34,7 +34,8 @@ urlpatterns = [
 
     url(r'^', include(restaurant_urls.urlpatterns)),
     # REST API Docs
-    url(r'^docs/', include_docs_urls(title='Fuel Dine API'))
+    # url(r'^docs/', include_docs_urls(title='Fuel Dine API'))
+    url(r'^docs/', include('rest_framework_docs.urls')),
 ]
 
 urlpatterns += [
