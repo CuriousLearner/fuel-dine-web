@@ -52,3 +52,19 @@ raven==6.1.0
 # Third-party stuff goes here
 -----------------------------
 django-vote==2.1.4
+
+# Docs
+------
+drfdocs==0.0.11
+
+# Material Design
+-----------------
+django-material==1.0.0
+
+# Django extensions
+-------------------
+django-extensions==1.8.1
+
+# Factory Boy
+-------------
+factory-boy-2.8.1
