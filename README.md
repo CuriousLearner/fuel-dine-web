@@ -1,7 +1,7 @@
 fuel_dine
 ==============================
 
-__Version:__ 0.0.0
+__Version:__ 0.1.0
 
 Decide where the team should dine in the restaurant.
 
