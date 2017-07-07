@@ -80,13 +80,19 @@ class Visit(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        verbose_name = "visit"
+        verbose_name_plural = "visits"
 
 
 class Review(ReviewComments):
     restaurant = models.ForeignKey(Restaurant, null=False, blank=False,
-                                   verbose_name=_(u'restaurant'))
+                                   verbose_name=_(u'restaurant'),
+                                   related_name='reviews',
+                                   on_delete=models.CASCADE)
 
     class Meta:
+        verbose_name = "review"
+        verbose_name_plural = "reviews"
         ordering = ['-posted_at']
 
     def __str__(self):
@@ -95,11 +101,31 @@ class Review(ReviewComments):
 
 class Comment(ReviewComments):
     review = models.ForeignKey(Review, null=False, blank=False,
-                               verbose_name=_(u'review'))
+                               verbose_name=_(u'review'),
+                               related_name='comments',
+                               on_delete=models.CASCADE)
 
     class Meta:
+        verbose_name = "comment"
+        verbose_name_plural = "comments"
         ordering = ['-posted_at']
 
     def __str__(self):
         return "{0} - {1}".format(self.user, self.text)
 
+
+class ThumbDown(models.Model):
+    user = models.ForeignKey(Profile, null=False,
+                             blank=False, verbose_name=_(u'user'))
+    restaurant = models.ForeignKey(Restaurant, null=False, blank=False,
+                                   verbose_name=_(u'restaurant'))
+    created_at = models.DateTimeField(default=timezone.now, null=False,
+                                      blank=False, verbose_name=_(u'created_at'))
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "thumb_down"
+        verbose_name_plural = "thumb_downs"
+
+    def __str__(self):
+        return "{0} did thumbs down to {1}".format(self.user, self.restaurant)

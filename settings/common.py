@@ -30,6 +30,11 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     # 'django.contrib.humanize',  # Useful template tags
 
+    # To use material UI
+    'material',
+
+    'rest_framework_docs',
+
     'fuel_dine.base',
     'fuel_dine.users',
 

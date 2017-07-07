@@ -1,193 +1,92 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.views.generic import DetailView
-from django.shortcuts import render, HttpResponseRedirect
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.urls import reverse
+from django.views.generic import TemplateView
 from django.conf import settings
 
 from rest_framework import status
-from rest_framework.generics import CreateAPIView, ListCreateAPIView
-from rest_framework.renderers import TemplateHTMLRenderer, JSONRenderer
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.generics import (
+    CreateAPIView, ListCreateAPIView, RetrieveAPIView
+)
+from rest_framework.renderers import JSONRenderer, DocumentationRenderer
+from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 
-
-from .models import Restaurant, Review, Comment
-from .serializers import RestaurantSerializer, ReviewSerializer, CommentSerializer
-from .forms import ReviewForm, CommentForm, RestaurantForm
-
-# Create your views here.
+from .models import Restaurant, ThumbDown, Visit
+from .serializers import (
+    RestaurantSerializer, ReviewSerializer, CommentSerializer
+)
 
 
 class RestaurantView(ListCreateAPIView):
-    """Restaurant Listing API for home page.
-
-    Renders restaurants/index.html by default. Also support JSON serialization.
+    """Restaurant Listing and creating Restaurant resource.
+    Listing
     """
     queryset = Restaurant.objects.filter(is_active=True)
     serializer_class = RestaurantSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
-    renderer_classes = (TemplateHTMLRenderer, JSONRenderer)
-    template_name = "restaurants/index.html"
+    renderer_classes = (JSONRenderer,)
+
+    def get_queryset(self):
+        # return all restaurants for anonymous user
+        if self.request.user.is_anonymous():
+            return Restaurant.objects.filter(is_active=True)
+
+        # Do not display restaurants to user that are thumbs down by them.
+        qs = ThumbDown.objects.filter(user=self.request.user.profile.id)
+        restaurant_thumbdown_list = list(qs.values_list('restaurant', flat=True))
+
+        return Restaurant.objects.filter(
+            is_active=True
+        ).exclude(id__in=restaurant_thumbdown_list)
 
 
-class ReviewView(ListCreateAPIView):
-    """Review Listing API
+class ReviewView(CreateAPIView):
+    """API for creating reviews for restaurants.
     """
-    queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     permission_classes = (IsAuthenticated,)
 
 
-class RestaurantDetailView(DetailView):
-    """Restaurant Detail API to be displayed on Restaurant Display page
-    along with reviews and comments.
+class CommentView(CreateAPIView):
+    """API for posting comments on reviews.
     """
-    model = Restaurant
-    permission_classes = (IsAuthenticated,)
-
-
-class RestaurantCreateView(CreateAPIView):
-    """API to create restaurant
-    """
-    model = Restaurant
-    serializer_class = RestaurantSerializer
-    permission_classes = (IsAuthenticated,)
-
-
-class ReviewCreateView(CreateAPIView):
-    """API to post new Reviews for Restaurants
-    """
-    model = Review
-    serializer_class = ReviewSerializer
-    permission_classes = (IsAuthenticated,)
-
-
-class CommentCreateView(CreateAPIView):
-    """API to post new comments on Reviews
-    """
-    model = Comment
     serializer_class = CommentSerializer
     permission_classes = (IsAuthenticated,)
 
 
-# All FBVs goes here
+class RestaurantGeocodingTemplate(TemplateView):
+    template_name = 'restaurants/add_restaurant_geocoding.html'
 
-@login_required()
-@permission_classes(IsAuthenticated,)
-def add_review_form(request, pk):
-    """View for rendering form for adding review to a particular restaurant.
-    Initial form contains Review text as "I like ..."
-
-    :param request: HTTPRequest Object
-    :param pk: Primary key of Restaurant to post review about.
-    :return: HttpResponseRedirect to /thanks/ on successful posting.
-    If Review text is empty, return the Form with error.
-    """
-    if request.method == 'POST':
-        # create a form instance and populate it with data from the request:
-        form = ReviewForm(request.POST)
-        # check whether it's valid:
-        if form.is_valid():
-            # process the data in form.cleaned_data as required
-            review = form.save(commit=False)
-            review.user = request.user.profile
-            review.restaurant = Restaurant.objects.get(pk=pk)
-            review.save()
-            messages.success(request, "Thanks for filling up the review!")
-            return HttpResponseRedirect('/thanks/')
-
-    else:
-        form = ReviewForm(initial={
-            'text': 'I like...'
-        })
-
-    return render(request, 'restaurants/add_review_form.html',
-                  {'form': form, 'restaurant': pk})
-
-
-@api_view(['GET', 'POST'])
-@permission_classes(IsAuthenticated,)
-def add_comment_form(request, pk):
-    """View for rendering form for adding comment to a particular review.
-    Initial form contains Comment text as "I like ..."
-
-    :param request: HTTPRequest Object
-    :param pk: Primary key of Review object to post comment about.
-    :return: HttpResponseRedirect to /thanks/ on successful posting.
-    If Comment text is empty, return the Form with error.
-    """
-    if request.method == 'POST':
-        # create a form instance and populate it with data from the request:
-        form = CommentForm(request.POST)
-        # check whether it's valid:
-        if form.is_valid():
-            # process the data in form.cleaned_data as required
-            comment = form.save(commit=False)
-            comment.user = request.user.profile
-            comment.review = Review.objects.get(pk=pk)
-            comment.save()
-            messages.success(request, "Thanks for filling up the comment!")
-            return HttpResponseRedirect('/thanks/')
-
-    else:
-        form = CommentForm(initial={
-            'text': 'I like...'
-        })
-
-    return render(request, 'restaurants/add_comment_form.html',
-                  {'form': form, 'review': pk})
-
-
-@api_view(['GET', 'POST'])
-def add_restaurant_form(request):
-    """View for rendering form for adding restaurant.
-
-    Dynamically attaches context of rendering geo-location searching or reverse
-    geo-location searching of the restaurant.
-
-    The context would consist of template and js file to be chosen to render
-    the view.
-
-    :param request: HTTPRequest Object
-    :return: HttpResponseRedirect to /thanks/ on successful posting.
-    If Comment text is empty, return the Form with error.
-    """
-    if request.method == 'POST':
-        # create a form instance and populate it with data from the request:
-        form = RestaurantForm(request.POST)
-        # check whether it's valid:
-        if form.is_valid():
-            # process the data in form.cleaned_data as required
-            restaurant = form.save(commit=False)
-            restaurant.save()
-            messages.success(request, "Thanks for adding the restaurant!")
-            return HttpResponseRedirect('/thanks/')
-
-    else:
-        form = RestaurantForm()
-
-    context = {
-        'form': form,
-        'GOOGLE_SERVICES_API_KEY': settings.GOOGLE_SERVICES_API_KEY
-    }
-
-    if request.get_full_path() == reverse('restaurant-add-geo'):
-        template_name = 'restaurants/add_restaurant_geocoding.html'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         context['js_file_name'] = 'geocode.js'
-    else:
-        template_name = 'restaurants/add_restaurant_geocoding_reverse.html'
-        context['js_file_name'] = 'reverse_geocode.js'
+        context['GOOGLE_SERVICES_API_KEY'] = settings.GOOGLE_SERVICES_API_KEY
+        return context
 
-    return render(request, template_name, context)
+
+class RestaurantReverseGeocodingTemplate(TemplateView):
+    template_name = 'restaurants/add_restaurant_geocoding_reverse.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['js_file_name'] = 'reverse_geocode.js'
+        context['GOOGLE_SERVICES_API_KEY'] = settings.GOOGLE_SERVICES_API_KEY
+        return context
+
+
+class RestaurantDetailView(RetrieveAPIView):
+    """Restaurant Detail API to be displayed on Restaurant Display page
+    along with reviews and comments.
+    """
+    permission_classes = (IsAuthenticated,)
+    queryset = Restaurant.objects.all()
+    serializer_class = RestaurantSerializer
 
 
 @api_view(['POST'])
-@permission_classes(IsAuthenticated,)
+@renderer_classes((JSONRenderer, DocumentationRenderer))
 def vote_for_restaurant(request, pk, action):
     """API for up vote or down vote a particular Restaurant.
 
@@ -214,6 +113,12 @@ def vote_for_restaurant(request, pk, action):
             status=status.HTTP_404_NOT_FOUND
         )
     vote_casted = False
+
+    if restaurant.votes.exists(user_id):
+        return Response(
+            data={'error': 'You have casted vote before for this restaurant'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
     if action == 'up':
         restaurant.votes.up(user_id=user_id)
         vote_casted = True
@@ -226,10 +131,145 @@ def vote_for_restaurant(request, pk, action):
             data={'data': 'Vote casted successfully'},
             status=status.HTTP_201_CREATED
         )
-
     else:
         return Response(
             data={'error': 'Unknown action for casting vote'},
             status=status.HTTP_400_BAD_REQUEST
         )
 
+
+@api_view(['POST'])
+@renderer_classes((JSONRenderer, DocumentationRenderer))
+def thumbs_down_for_restaurant(request, pk):
+    """API for thumbs down for a particular Restaurant.
+
+    :param request: HttpRequest Object.
+    :param pk: Primary key of Restaurant.
+    :return: Return 201 status on successful vote cast & JSON Response as:
+    {
+        'data': 'Restaurant thumbs down successfully'
+    }
+    Return 400 status on Unknown action & JSON Response as:
+    {
+        'error': 'Restaurant already thumbs down by you'
+    }
+    """
+    user = request.user.profile
+    try:
+        restaurant = Restaurant.objects.get(id=pk)
+    except Restaurant.DoesNotExist:
+        return Response(
+            data={'error': 'Restaurant does not exist'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    # Try getting a thumb down if it exists or create one and return
+    # appropriate response based on value of `created`.
+    thumb_down, created = ThumbDown.objects.get_or_create(restaurant=restaurant, user=user)
+    if created:
+        return Response(
+            data={'data': 'Restaurant thumbs down successfully'},
+            status=status.HTTP_201_CREATED
+        )
+
+    return Response(
+        data={'error': 'Restaurant already thumbs down by you'},
+        status=status.HTTP_400_BAD_REQUEST
+    )
+
+
+@api_view(['POST'])
+@renderer_classes((JSONRenderer, DocumentationRenderer))
+def mark_restaurant_visited(request, pk):
+    """API for marking restaurant visited for the user.
+
+    :param request: HttpRequest Object.
+    :param pk: Primary key of Restaurant.
+    :return: Return 201 status on successful vote cast & JSON Response as:
+    {
+        'data': 'Visit marked successfully for this restaurant'
+    }
+
+    Return 400 status on Unknown action & JSON Response as:
+    {
+        'error': 'Visit already marked for this restaurant'
+    }
+    """
+    user = request.user.profile
+    try:
+        restaurant = Restaurant.objects.get(id=pk)
+    except Restaurant.DoesNotExist:
+        return Response(
+            data={'error': 'Restaurant does not exist'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    # Try getting a visit if it exists or create one and return appropriate
+    # response based on value of `created`.
+    visit, created = Visit.objects.get_or_create(restaurant=restaurant, user=user)
+    if created:
+        return Response(
+            data={'data': 'Visit marked successfully for this restaurant'},
+            status=status.HTTP_201_CREATED
+        )
+    return Response(
+        data={'error': 'Visit already marked for this restaurant'},
+        status=status.HTTP_400_BAD_REQUEST
+    )
+
+
+@api_view(['GET'])
+@renderer_classes((JSONRenderer, DocumentationRenderer))
+def who_am_i(request):
+    """API for returning the email of current user. This is for the
+    requirement of displaying special symbol with review that are posted by
+    the current logged in user.
+
+    :param request: HttpRequest Object.
+    """
+    email = request.user.email
+    return Response(
+        data={'email': email},
+        status=status.HTTP_200_OK
+    )
+
+
+@api_view(['GET'])
+@renderer_classes((JSONRenderer, DocumentationRenderer))
+def select_restaurant_for_dining_based_on_votes(request):
+    """Get top voted restaurants to choose among the best restaurants for
+    dining.
+
+    :param request: HttpRequest Object.
+    """
+    restaurant_id_list = list(
+        ThumbDown.objects.all().values_list('restaurant', flat=True)
+    )
+    restaurants = Restaurant.objects.all()\
+        .exclude(id__in=restaurant_id_list).order_by('-vote_score')
+    serializer = RestaurantSerializer(restaurants, many=True)
+    return Response(
+        data={'result': serializer.data},
+        status=status.HTTP_200_OK
+    )
+
+
+# This API would take much time, so dropping this extra feature for now.
+
+# @api_view(['DELETE'])
+# @renderer_classes((JSONRenderer, DocumentationRenderer))
+# def reset_vote_count_for_restaurants(request):
+#     """Reset vote count for all restaurants done by current user to choose a
+#     new restaurant next time for dining.
+#
+#     :param request: HttpRequest Object.
+#     """
+#     # TODO: Move this task to be asynchronous via Celery.
+#     # TODO: Enable resetting votes for all users in all restaurants.
+#     restaurants = Restaurant.objects.all()
+#     restaurants.update(num_vote_up=0, num_vote_down=0, vote_score=0)
+#     user = request.user
+#     for restaurant in restaurants:
+#         restaurant.votes.delete(user_id=None)
+#     return Response(
+#         data={'result': "Votes reset successfully!"},
+#         status=status.HTTP_200_OK
+#     )

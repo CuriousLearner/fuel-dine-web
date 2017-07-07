@@ -1,15 +1,25 @@
 {% extends 'pages/base.html' %}
 {% load i18n %}
+{% load static %}
 {% load rest_framework %}
 {% block title %}{% trans 'Home' %} • {{ block.super }}{% endblock title %}
 {% block body_classes %}{{ block.super}} page-home {% endblock body_classes %}
 {% block content %}
+{% load material_form %}
 {% block comment_form %}
   <p>Write a new comment:</p>
-  <form action="{% url 'comment-add' pk=review %}" method="post">
+  <form id="add-comment">
     {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Submit" />
+      <div class="input-field col s12">
+        <textarea id="id_comment_text"
+                  placeholder="I think that this review..."
+                  class="materialize-textarea" required></textarea>
+        <label for="id_comment_text">Comment</label>
+      </div>
+      <input type="hidden" id="review_id" name="restaurant_id" value="{{ pk }}">
+      <input type="hidden" id="user_id" name="user_id" value="{{ request.user.profile.id }}">
+    <input class="waves-effect waves-light btn" type="submit" value="Submit" />
+    <div id="submit-result"></div>
   </form>
 {% endblock %}
 {% endblock content %}

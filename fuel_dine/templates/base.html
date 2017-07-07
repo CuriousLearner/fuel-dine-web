@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8">
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.png' %}">
-    <title>{% block title %}fuel_dine{% endblock title %}</title>
+    <title>{% block title %}Fuel Dine{% endblock title %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="version" content="{{ site_info.RELEASE_VERSION }}">
     <meta name="description" content="{% block meta_description %}{% endblock meta_description %}">
@@ -13,8 +13,13 @@
         <script>Raven.config('{% sentry_public_dsn %}').install()</script>
     {% endif %}
 
+    {% include 'material/includes/material_css.html' %}
+
     {% block css %}
     <link href="{% static 'css/normalize.css' %}" rel="stylesheet">
+    <link href="{% static 'css/main.css' %}" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet">
     {% compress css %}
     <link href="{% static 'css/main.scss' %}"  type="text/x-scss" rel="stylesheet">
     {% endcompress %}
@@ -22,13 +27,19 @@
     {% block head_extras %}{% endblock %}
   </head>
 
-  <body class="{% block body_classes %}{% endblock body_classes %} ">
+  <body class="{% block body_classes %}{% endblock body_classes %}"
+        onload="{% block onloadfunction %}{% endblock onloadfunction %}">
     <!--[if lt IE 8]>
     <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
     <![endif]-->
 
     {% block header %}
-      <h1><a href="{% url 'home' %}">fuel_dine</a></h1>
+      <h1><a href="{% url 'home' %}">Fuel Dine</a></h1>
+        {% if request.user.is_authenticated %}
+          <a href="{% url 'logout' %}" class="right-align">Logout</a>
+        {% else %}
+          <a href="{% url 'login' %}" class="right-align">Login</a>
+        {% endif %}
     {% endblock header %}
 
     {% block content %}
@@ -45,6 +56,7 @@
       <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 
       <!-- Your stuff: Third-party javascript libraries go here -->
+      {% include 'material/includes/material_js.html' %}
 
       <!-- place project specific Javascript in this file -->
       {% compress js %}

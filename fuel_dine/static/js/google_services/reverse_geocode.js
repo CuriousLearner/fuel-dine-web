@@ -17,6 +17,11 @@ function fill_restaurant_form(address, latitude, longitude) {
   document.getElementById('id_address').value = address;
   document.getElementById('id_lat').value = latitude;
   document.getElementById('id_lon').value = longitude;
+  // Update Materialize form text fields to consistently move labels up on
+  // activating the element.
+  $(function() {
+    Materialize.updateTextFields();
+  });
 }
 
 function geocodeLatLng(geocoder, map, infowindow) {
